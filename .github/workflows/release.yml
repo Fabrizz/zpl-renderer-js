@@ -31,9 +31,9 @@ jobs:
           go build -o main.wasm .
 
       # Wasm_exec.js is currently bundled. Later we will use the copied handler
-      - name: Copy wasm_exec.js next to the wasm
-        run: |
-          cp "$(go env GOROOT)/misc/wasm/wasm_exec.js" zebrash/wasm_exec.js
+      # - name: Copy wasm_exec.js next to the wasm
+      #   run: |
+      #    cp "$(go env GOROOT)/misc/wasm/wasm_exec.js" zebrash/wasm_exec.js#
 
       - uses: actions/setup-node@v4
         with:
