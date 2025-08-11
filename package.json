@@ -10,7 +10,9 @@
   "types": "dist/index.d.ts",
   "scripts": {
     "build": "npm run build:types && node build.js",
-    "build:types": "tsc -p tsconfig.json"
+    "build:types": "tsc -p tsconfig.json",
+    "build:wasm": "cd zebrash && GOOS=js GOARCH=wasm go build -o main.wasm .",
+    "build:pw:wasm": "cd zebrash; $env:GOOS='js'; $env:GOARCH='wasm'; go build -o main.wasm ."
   },
   "files": [
     "dist"
