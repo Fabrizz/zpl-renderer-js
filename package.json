@@ -7,7 +7,7 @@
   "main": "dist/index.cjs.js",
   "module": "dist/index.esm.js",
   "unpkg": "dist/index.umd.js",
-  "types": "dist/types/index.d.ts",
+  "types": "dist/index.d.ts",
   "scripts": {
     "build": "npm run build:types && node build.js",
     "build:types": "tsc -p tsconfig.json"
@@ -18,13 +18,17 @@
   "devDependencies": {
     "@types/node": "^24.2.0",
     "esbuild": "^0.25.8",
-    "typescript": "^5.9.2"
+    "typescript": "^5.9.2",
+    "vite-plugin-top-level-await": "^1.6.0",
+    "vite-plugin-wasm": "^3.5.0",
+    "vitest": "^3.2.4"
   },
   "exports": {
     ".": {
+      "types": "./dist/index.d.ts",
       "require": "./dist/index.cjs.js",
-      "import": "./dist/index.esm.js",
-      "types": "./dist/types/index.d.ts"
-    }
+      "import": "./dist/index.esm.js"
+    },
+    "./zebrash.wasm": "./dist/zebrash.wasm"
   }
 }
