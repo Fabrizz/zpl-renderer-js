@@ -1,0 +1,30 @@
+{
+  "name": "zpljs",
+  "version": "1.0.0",
+  "author": "Fabrizio",
+  "license": "ISC",
+  "description": "Compatibility layer for ingridhq/zebrash to work in the browser! (WASM)",
+  "main": "dist/index.cjs.js",
+  "module": "dist/index.esm.js",
+  "unpkg": "dist/index.umd.js",
+  "types": "dist/types/index.d.ts",
+  "scripts": {
+    "build": "npm run build:types && node build.js",
+    "build:types": "tsc -p tsconfig.json"
+  },
+  "files": [
+    "dist"
+  ],
+  "devDependencies": {
+    "@types/node": "^24.2.0",
+    "esbuild": "^0.25.8",
+    "typescript": "^5.9.2"
+  },
+  "exports": {
+    ".": {
+      "require": "./dist/index.cjs.js",
+      "import": "./dist/index.esm.js",
+      "types": "./dist/types/index.d.ts"
+    }
+  }
+}
