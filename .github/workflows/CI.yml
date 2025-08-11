@@ -1,0 +1,55 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # --- Go (WASM) ---
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: zebrash/go.mod
+          cache: true
+
+      - name: Build Go → WASM
+        working-directory: zebrash
+        run: |
+          GOOS=js GOARCH=wasm go build -o main.wasm .
+      #   cp "$(go env GOROOT)/misc/wasm/wasm_exec.js" ./wasm_exec.js
+
+      # --- Node (npm) ---
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+          cache: 'npm'
+          registry-url: https://registry.npmjs.org
+
+      - name: Install
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      # --- Artifacts (optional but handy) ---
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-artifacts
+          if-no-files-found: ignore
+          path: |
+            dist/**
+            zebrash/main.wasm
+            zebrash/wasm_exec.js

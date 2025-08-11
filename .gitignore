@@ -141,3 +141,5 @@ vite.config.ts.timestamp-*
 # Go
 zebrash/*.wasm
 
+# Tests
+tests/output
