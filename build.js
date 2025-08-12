@@ -5,7 +5,7 @@ const fs = require("fs");
 const path = require("path");
 
 const licenseBanner = `/*!
- * zplJS - 2025 Fabrizio <3
+ * zpl-image-js - 2025 Fabrizio <3
  * Released under the MIT License
  * 
  * > Zebrash (GO) by IngridHQ - MIT License

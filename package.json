@@ -1,6 +1,6 @@
 {
-  "name": "zpljs",
-  "version": "1.1.0",
+  "name": "zpl-image-js",
+  "version": "1.2.3",
   "author": "Fabrizio",
   "license": "ISC",
   "description": "Compatibility layer for ingridhq/zebrash to work in the browser! (WASM)",
@@ -32,5 +32,9 @@
       "import": "./dist/index.esm.js"
     },
     "./zebrash.wasm": "./dist/zebrash.wasm"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Fabrizz/zpl-image-js"
   }
 }
