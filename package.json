@@ -1,10 +1,10 @@
 {
-  "name": "zpl-image-js",
+  "name": "zpl-renderer-js",
   "version": "1.2.3",
   "author": "Fabrizio",
   "license": "MIT",
   "description": "Render ZPL (Zebra Programming Language) to PNG in the browser! Without Labelary or any third-party service.",
-  "homepage": "https://github.com/Fabrizz/zpl-image-js",
+  "homepage": "https://github.com/Fabrizz/zpl-renderer-js",
   "keywords": [
     "zpl",
     "zebra",
@@ -52,6 +52,6 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/Fabrizz/zpl-image-js"
+    "url": "https://github.com/Fabrizz/zpl-renderer-js"
   }
 }
