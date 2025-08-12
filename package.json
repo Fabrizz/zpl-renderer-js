@@ -1,6 +1,6 @@
 {
   "name": "zpl-image-js",
-  "version": "1.2.2",
+  "version": "1.2.3",
   "author": "Fabrizio",
   "license": "ISC",
   "description": "Compatibility layer for ingridhq/zebrash to work in the browser! (WASM)",
