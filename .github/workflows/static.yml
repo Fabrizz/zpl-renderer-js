@@ -3,7 +3,7 @@ name: Deploy Vite site to Pages
 
 on:
   push:
-    branches: ["main"]
+    branches: ["gh_pages"]
   workflow_dispatch:
 
 permissions:
