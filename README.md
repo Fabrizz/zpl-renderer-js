@@ -1,7 +1,9 @@
 > ZPL-Renderer-JS is a WASM port of Zebrash
 
+<img alt="Fabrizz Logo" src="./.github/logo.png" width="80px"/>
+
 # ZPL-Renderer-JS
-Render ZPL to PNG directly in the browser (or node) without the use of third party services like Labelary or a dedicated service!
+Render ZPL to PNG directly in the browser (or node) without the use of third party services like Labelary or labelzoom!
 
 ## Instalation
 ```bash
@@ -22,6 +24,7 @@ const zplImage = api.Render("^XA^FO50,50^ADN,36,20^FDHello^FS^XZ");
 
 console.log("Base64 PNG", zplImage)
 ```
+
 ```ts
   /**
    * Render a ZPL label into a PNG image (Base64-encoded string).

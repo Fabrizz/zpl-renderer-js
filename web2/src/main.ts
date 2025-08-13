@@ -1,28 +1,7 @@
-import { test, expect } from "vitest";
+import './style.css'
 
-import { webcrypto } from "node:crypto";
-import { performance } from "node:perf_hooks";
-import { TextEncoder, TextDecoder } from "node:util";
-import fs from "node:fs";
-
-(globalThis as any).crypto ??= webcrypto;
-(globalThis as any).performance ??= performance;
-(globalThis as any).TextEncoder ??= TextEncoder;
-(globalThis as any).TextDecoder ??= TextDecoder;
-
-import { ready } from "../"
-import { join } from "node:path";
-
-test("Renders UPS-Surepost ZPL to base64 PNG", async () => {
-  const { api } = await ready;
-  const b64 = api.Render(ZPL);
-  expect(typeof b64).toBe("string");
-  expect(b64.length).toBeGreaterThan(100);
-
-  const path = join(__dirname, "/output", "upssp.test.png");
-  fs.writeFileSync(path, Buffer.from(b64, "base64"));
-  expect(fs.existsSync(path)).toBe(true);
-});
+import { ready } from 'zpl-renderer-js';
+const { api } = await ready;
 
 const ZPL = `^XA
 ^LRN
@@ -76,3 +55,12 @@ const ZPL = `^XA
 ^FO0,1207^GB812,11,11,B,0^FS
 ^FO10,1300^A0N,23,23^FDCONTAINS NICOTINE PRODUCTS^FS^FO10,1375^A0N,23,23^FDCIGARETTES/SMOKELESS TOBACCO:  FEDERAL LAW REQUIRES THE PAYMENT OF^FS ^FO10,1400^A0N,23,23^FDALL APPLICABLE EXCISE TAXES, AND COMPLIANCE  WITH APPLICABLE LICENSING^FS ^FO10,1425^A0N,23,23^FDAND TAX-STAMPING OBLIGATIONS.^FS^XZ
 `;
+
+const b64 = api.Render(ZPL);
+
+document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
+  <div>
+    <h1>ZPL Renderer JS</h1>
+      <img src="data:image/png;base64,${b64}" alt="Rendered ZPL Image"/>
+  </div>
+`
