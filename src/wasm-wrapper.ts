@@ -18,11 +18,15 @@ function isInstantiatedSource(
   return (r as any).instance !== undefined;
 }
 
-function decodeBase64Browser(b64: string): Uint8Array {
-  const bin = atob(b64);
-  const out = new Uint8Array(bin.length);
-  for (let i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
-  return out;
+function decodeBase64Universal(b64: string): Uint8Array {
+  if (typeof atob === "function") {
+    const bin = atob(b64);
+    const out = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
+    return out;
+  }
+  // Node path
+  return Uint8Array.from(Buffer.from(b64, "base64"));
 }
 
 type InitOptions<TApi> = {
@@ -52,7 +56,7 @@ export async function initGoWasm<TApi = Record<string, unknown>>(
     }
   }
 
-  const bytes = decodeBase64Browser(wasmB64);
+  const bytes = decodeBase64Universal(wasmB64);
   const res = await WebAssembly.instantiate(bytes, importObject as WebAssembly.Imports);
   const instance = isInstantiatedSource(res) ? res.instance : res; // <- works in both cases
 

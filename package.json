@@ -28,11 +28,13 @@
   "scripts": {
     "build": "npm run build:types && node build.js",
     "build:types": "tsc -p tsconfig.json",
-    "build:wasm": "cd zebrash && GOOS=js GOARCH=wasm go build -o main.wasm .",
-    "build:pw:wasm": "cd zebrash; $env:GOOS='js'; $env:GOARCH='wasm'; go build -o main.wasm ."
+    "build:wasm": "cd zebrash && GOOS=js GOARCH=wasm go build -o main.wasm -trimpath -buildvcs=false -ldflags=\"-s -w\" .",
+    "build:pw:wasm": "cd zebrash; $env:GOOS='js'; $env:GOARCH='wasm'; go build -o main.wasm -trimpath -buildvcs=false -ldflags=\"-s -w\" ."
   },
   "files": [
-    "dist"
+    "dist/*.js",
+    "dist/*.ts",
+    "dist/*.wasm"
   ],
   "devDependencies": {
     "@types/node": "^24.2.0",
