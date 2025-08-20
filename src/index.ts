@@ -11,7 +11,7 @@ export type ZplApi = {
    * @param heightMm - Label height in millimeters. Defaults to 203.2 mm (~8 inches).
    * @param dpmm - Dots per millimeter (print resolution). Defaults to 8 (~203 DPI).
    * @returns A Base64-encoded PNG image string representing the rendered label.
-   * @deprecated Use `zplToBase64` instead.
+   * @deprecated Use `zplToBase64Async` instead.
    */
   Render: (
     zpl: string,
@@ -21,28 +21,29 @@ export type ZplApi = {
   ) => string;
 
   /**
-   * Render a ZPL label into a PNG image (Base64-encoded string).
+   * Asynchronously render a ZPL label into a PNG image (Base64-encoded string).
    *
    * @param zpl - The raw ZPL code to render.
    * @param widthMm - Label width in millimeters. Defaults to 101.6 mm (~4 inches).
    * @param heightMm - Label height in millimeters. Defaults to 203.2 mm (~8 inches).
    * @param dpmm - Dots per millimeter (print resolution). Defaults to 8 (~203 DPI).
-   * @returns A Base64-encoded PNG image string representing the rendered label.
+   * @returns A Promise that resolves to a Base64-encoded PNG image string representing the rendered label.
    * @throws Will throw an error if the ZPL is invalid or rendering fails.
    * @example
    * ```typescript
    * import { ready } from "zpl-renderer-js"
    * const { api } = await ready;
-   * const zplImage = api.zplToBase64("^XA^FO50,50^ADN,36,20^FDHello^FS^XZ");
+   * const zplImage = await api.zplToBase64Async("^XA^FO50,50^ADN,36,20^FDHello^FS^XZ");
    * console.log(zplImage); // Base64-encoded PNG string
    * ```
    */
-  zplToBase64: (
+  zplToBase64Async: (
     zpl: string,
     widthMm?: number,
     heightMm?: number,
     dpmm?: number
-  ) => string;
+  ) => Promise<string>;
+
 };
 
 // Initialize using the namespace the Go code sets: globalThis.zpl
@@ -66,12 +67,12 @@ export async function Render(
   return api.Render(zpl, widthMm, heightMm, dpmm);
 }
 
-export async function zplToBase64(
+export async function zplToBase64Async(
   zpl: string,
   widthMm?: number,
   heightMm?: number,
   dpmm?: number
 ): Promise<string> {
   const api = await getApi();
-  return api.zplToBase64(zpl, widthMm, heightMm, dpmm);
+  return api.zplToBase64Async(zpl, widthMm, heightMm, dpmm);
 }

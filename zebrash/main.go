@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"encoding/base64"
+	"fmt"
 	"syscall/js"
 
 	"github.com/ingridhq/zebrash"
@@ -11,7 +12,7 @@ import (
 
 var (
 	renderBasicFn js.Func
-	renderFn      js.Func
+	renderAsyncFn js.Func
 )
 
 // --- Core render helper (bytes) ---
@@ -69,37 +70,63 @@ func renderBase64Basic(this js.Value, args []js.Value) any {
 	return js.ValueOf(base64.StdEncoding.EncodeToString(png))
 }
 
-func renderBase64(this js.Value, args []js.Value) any {
-	if len(args) < 1 {
-		panic(js.Global().Get("Error").New("Missing argument: zpl"))
-	}
-	zpl := args[0].String()
+func renderBase64Async(this js.Value, args []js.Value) any {
+	// Create and return a Promise
+	promiseConstructor := js.Global().Get("Promise")
+	return promiseConstructor.New(js.FuncOf(func(this js.Value, promiseArgs []js.Value) any {
+		resolve := promiseArgs[0]
+		reject := promiseArgs[1]
 
-	// Defaults: 101.6 × 203.2 mm @ 8 dpmm (~203 DPI)
-	widthMm := 101.6
-	heightMm := 203.2
-	dpmm := 8
+		// Run the processing in a goroutine to make it async
+		go func() {
+			// Recover from any panics and convert to Promise rejection
+			defer func() {
+				if r := recover(); r != nil {
+					reject.Invoke(js.Global().Get("Error").New(fmt.Sprintf("Unexpected error: %v", r)))
+				}
+			}()
 
-	// Optional overrides
-	if len(args) > 1 && args[1].Type() == js.TypeNumber {
-		widthMm = args[1].Float()
-	}
-	if len(args) > 2 && args[2].Type() == js.TypeNumber {
-		heightMm = args[2].Float()
-	}
-	if len(args) > 3 && args[3].Type() == js.TypeNumber {
-		dpmm = args[3].Int()
-	}
+			// Validation
+			if len(args) < 1 {
+				reject.Invoke(js.Global().Get("Error").New("Missing argument: zpl"))
+				return
+			}
 
-	png, err := zplToPNGBytes(zpl, widthMm, heightMm, dpmm)
-	if err != nil {
-		panic(js.Global().Get("Error").New("Error rendering: " + err.Error()))
-	}
-	if len(png) == 0 {
-		panic(js.Global().Get("Error").New("No labels parsed"))
-	}
+			zpl := args[0].String()
 
-	return js.ValueOf(base64.StdEncoding.EncodeToString(png))
+			// Defaults: 101.6 × 203.2 mm @ 8 dpmm (~203 DPI)
+			widthMm := 101.6
+			heightMm := 203.2
+			dpmm := 8
+
+			// Optional overrides
+			if len(args) > 1 && args[1].Type() == js.TypeNumber {
+				widthMm = args[1].Float()
+			}
+			if len(args) > 2 && args[2].Type() == js.TypeNumber {
+				heightMm = args[2].Float()
+			}
+			if len(args) > 3 && args[3].Type() == js.TypeNumber {
+				dpmm = args[3].Int()
+			}
+
+			// Process the ZPL
+			png, err := zplToPNGBytes(zpl, widthMm, heightMm, dpmm)
+			if err != nil {
+				reject.Invoke(js.Global().Get("Error").New("Error rendering: " + err.Error()))
+				return
+			}
+			if len(png) == 0 {
+				reject.Invoke(js.Global().Get("Error").New("No labels parsed"))
+				return
+			}
+
+			// Success - resolve the promise with the base64 string
+			resolve.Invoke(js.ValueOf(base64.StdEncoding.EncodeToString(png)))
+		}()
+
+		return nil
+	}))
 }
 
 func main() {
@@ -116,9 +143,9 @@ func main() {
 	renderBasicFn = js.FuncOf(renderBase64Basic)
 	zplNS.Set("Render", renderBasicFn)
 
-	// New API: globalThis.zpl.zplToBase64(...)
-	renderFn = js.FuncOf(renderBase64)
-	zplNS.Set("zplToBase64", renderFn)
+	// New async API: globalThis.zpl.zplToBase64Async(...)
+	renderAsyncFn = js.FuncOf(renderBase64Async)
+	zplNS.Set("zplToBase64Async", renderAsyncFn)
 
 	select {}
 }

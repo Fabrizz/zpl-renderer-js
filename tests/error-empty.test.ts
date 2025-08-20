@@ -15,8 +15,9 @@ test("returns an error when empty zpl argument", async () => {
   const { api } = await ready;
   try {
     // @ts-expect-error Missing required argument
-    const b64: any = api.zplToBase64();
+    const b64: any = await api.zplToBase64Async();
   } catch (error) {
     expect(error).toBeInstanceOf(Error);
+    expect(error.message).toContain("Missing argument: zpl");
   }
 });

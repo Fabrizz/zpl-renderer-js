@@ -15,7 +15,7 @@ import { join } from "node:path";
 
 test("Renders UPS-Surepost ZPL", async () => {
   const { api } = await ready;
-  const b64 = api.zplToBase64(ZPL);
+  const b64 = await api.zplToBase64Async(ZPL);
   expect(typeof b64).toBe("string");
   expect(b64.length).toBeGreaterThan(100);
 
