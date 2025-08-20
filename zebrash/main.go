@@ -9,6 +9,11 @@ import (
 	"github.com/ingridhq/zebrash/drawers"
 )
 
+var (
+	renderBasicFn js.Func
+	renderFn      js.Func
+)
+
 // --- Core render helper (bytes) ---
 func zplToPNGBytes(zpl string, widthMm, heightMm float64, dpmm int) ([]byte, error) {
 	parser := zebrash.NewParser()
@@ -66,7 +71,7 @@ func renderBase64Basic(this js.Value, args []js.Value) any {
 
 func renderBase64(this js.Value, args []js.Value) any {
 	if len(args) < 1 {
-		return js.RuntimeError("Missing argument: zpl")
+		panic(js.Global().Get("Error").New("Missing argument: zpl"))
 	}
 	zpl := args[0].String()
 
@@ -88,10 +93,10 @@ func renderBase64(this js.Value, args []js.Value) any {
 
 	png, err := zplToPNGBytes(zpl, widthMm, heightMm, dpmm)
 	if err != nil {
-		return js.RuntimeError("Error rendering: " + err.Error())
+		panic(js.Global().Get("Error").New("Error rendering: " + err.Error()))
 	}
 	if len(png) == 0 {
-		return js.RuntimeError("No labels parsed")
+		panic(js.Global().Get("Error").New("No labels parsed"))
 	}
 
 	return js.ValueOf(base64.StdEncoding.EncodeToString(png))
@@ -103,15 +108,17 @@ func main() {
 	// Namespace: globalThis.zpl.Render(...)
 	zplNS := global.Get("zpl")
 	if zplNS.IsUndefined() || zplNS.IsNull() {
-		zplNS = js.ValueOf(map[string]any{})
+		zplNS = global.Get("Object").New() // {}  (better than js.ValueOf(map[...]{}))
 		global.Set("zpl", zplNS)
 	}
 
 	// Compatibility with older API: globalThis.zpl.Render(...)
-	zplNS.Set("Render", js.FuncOf(renderBase64Basic))
+	renderBasicFn = js.FuncOf(renderBase64Basic)
+	zplNS.Set("Render", renderBasicFn)
 
 	// New API: globalThis.zpl.zplToBase64(...)
-	zplNS.set("zplToBase64", js.FuncOf(renderBase64))
+	renderFn = js.FuncOf(renderBase64)
+	zplNS.Set("zplToBase64", renderFn)
 
 	select {}
 }

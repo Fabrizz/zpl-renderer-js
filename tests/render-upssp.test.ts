@@ -13,9 +13,9 @@ import fs from "node:fs";
 import { ready } from "../"
 import { join } from "node:path";
 
-test("Renders UPS-Surepost ZPL to base64 PNG", async () => {
+test("Renders UPS-Surepost ZPL", async () => {
   const { api } = await ready;
-  const b64 = api.Render(ZPL);
+  const b64 = api.zplToBase64(ZPL);
   expect(typeof b64).toBe("string");
   expect(b64.length).toBeGreaterThan(100);
 
