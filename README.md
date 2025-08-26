@@ -75,4 +75,11 @@ console.log("Base64 PNG: ", zplImage)
     dpmm?: number
   ) => string;
 ```
+<br/>
 
+<img alt="Fabrizz logo" src="./.github/logo.png" width="92"><br/>
+
+#
+
+[<img alt="Fabrizz logo" src="./.github/fabriz.png" width="92" align="right">](https://fabriz.co)
+<p align="left">Made with <3 by Fabrizz</p>
