@@ -1,9 +1,12 @@
 > ZPL-Renderer-JS is a wrapper of [Zebrash by IngridHQ](https://github.com/ingridhq/zebrash)
 
-<img alt="Fabrizz Logo" src="./.github/logo.png" width="80px"/>
+<img alt="Fabrizz Logo" src="./.github/bar-zpl.png" height="120px"/>
 
 # ZPL-Renderer-JS
-Render ZPL to PNG directly in the browser (or node) without the use of third party services like Labelary or labelzoom!
+Convert Zebra ZPL labels to PNG directly in the browser (or node) without the use of third party services like Labelary or labelzoom!
+
+### Online playground
+XA Viewer has ZPL completitions/recommendations and lets you export ZPL in various image types:<br/>[<img alt="Fabrizz Logo" src="./.github/bar-xaviewer.png" height="120px"/>](https://xaviewer.fabriz.co/)
 
 ## Instalation
 ```bash
@@ -11,10 +14,14 @@ npm i zpl-renderer-js
 ```
 
 ## Usage
-The NPM package includes .umd, .esm, and .cjs it also includes the raw WASM if you want to directly use it or load it in a different way.
+The NPM package includes `.umd`, `.esm`, and `.cjs` builds. You can also find the raw `WASM` if you want to load it as a separate resource.
+> In case of using the raw `WASM` you will need to load `src/wasm_exec.js` and create a wrapper for the functions.
 
-> [!IMPORTANT]  
-> The output of this library is **+9MB** as it bundles the WASM and the necessary handlers for it to work. Its higly recommended that you defer/cache the lib.
+> [!WARNING]  
+> The output of this library (per build) is **~8MB** as the wasm is inlined inside so no resource has to be loaded separately. It is higly recommended that you use a bundler and lazy load the library (or the component that uses the lib.) <br/> In case of using the `.umd` build defer the load of the resource.
+
+> [!NOTE]
+> Loading the library in a web worker is also recommended and more so if you are planning on doing multiple renderings in a short time span. <br/> For now this is not included as a function directly in the library, you need to create and load the web worker. An example can be found in `examples/1-zpl-web-worker.ts` and a consumer component in `examples/1-zpl-ww-consumer.tsx`
 
 ```ts
 import { ready } from "zpl-renderer-js"
@@ -22,7 +29,7 @@ import { ready } from "zpl-renderer-js"
 const { api } = await ready;
 const zplImage = await api.zplToBase64Async("^XA^FO50,50^ADN,36,20^FDHello^FS^XZ");
 
-console.log("Base64 PNG", zplImage)
+console.log("Base64 PNG: ", zplImage)
 ```
 
 ```ts
@@ -50,7 +57,7 @@ console.log("Base64 PNG", zplImage)
     dpmm?: number
   ) => Promise<string>;
 
-  ///////////// [OLD API] /////////////
+  ///////////// [OLD API, use the async variant] /////////////
   /**
    * Render a ZPL label into a PNG image (Base64-encoded string).
    *
@@ -68,3 +75,4 @@ console.log("Base64 PNG", zplImage)
     dpmm?: number
   ) => string;
 ```
+
