@@ -43,6 +43,9 @@ jobs:
       - name: Build
         run: npm run build
 
+      - name: Test
+        run: npm test
+
       # --- Artifacts (optional but handy) ---
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4

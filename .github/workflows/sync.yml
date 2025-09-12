@@ -1,0 +1,47 @@
+name: Sync Zebrash Version
+
+on:
+  schedule:
+    - cron: "0 0 1 * *" # Runs at midnight on the first day of every month
+
+jobs:
+  check-and-update:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Get latest tag from Zebrash
+        id: get_latest_tag
+        run: |
+          latest_tag=$(curl -s https://api.github.com/repos/ingridhq/zebrash/tags | jq -r '.[0].name')
+          echo "Latest tag: $latest_tag"
+          echo "latest_tag=$latest_tag" >> $GITHUB_ENV
+
+      - name: Get current version from go.mod
+        id: get_current_version
+        run: |
+          current_version=$(grep 'zebrash' go.mod | awk '{print $2}')
+          echo "Current version: $current_version"
+          echo "current_version=$current_version" >> $GITHUB_ENV
+
+      - name: Compare versions
+        id: compare_versions
+        run: |
+          if [ "$latest_tag" != "$current_version" ]; then
+            echo "Newer version available: $latest_tag"
+            echo "update_needed=true" >> $GITHUB_ENV
+          else
+            echo "No update needed"
+            echo "update_needed=false" >> $GITHUB_ENV
+
+      - name: Create Pull Request
+        if: env.update_needed == 'true'
+        uses: peter-evans/create-pull-request@v5
+        with:
+          commit-message: "Update zebrash to ${{ env.latest_tag }}"
+          title: "Update zebrash to ${{ env.latest_tag }}"
+          body: "This PR updates the zebrash dependency to the latest version: ${{ env.latest_tag }}."
+          branch: "update-zebrash-${{ env.latest_tag }}"
+          labels: "dependencies"
