@@ -40,15 +40,33 @@ jobs:
             echo "update_needed=true" >> $GITHUB_ENV
           else
             echo "No update needed"
-            echo "update_needed=false" >> $GITHUB_ENV
+            echo "update_needed=true" >> $GITHUB_ENV
           fi
+        
+      - name: Set up Go
+        if: env.update_needed == 'true'
+        uses: actions/setup-go@v5
+        with:
+          go-version: '>=1.21'
+
+      - name: Update zebrash dependency
+        if: env.update_needed == 'true'
+        run: |
+          set -euo pipefail
+          MOD="github.com/ingridhq/zebrash"
+          ver="${{ env.latest_tag }}"
+          go get "${MOD}@${ver}"
+          go mod tidy
+          # Optional: quick sanity check
+          # go build ./...
+          # go test -count=1 ./...
 
       - name: Create Pull Request
         if: env.update_needed == 'true'
         uses: peter-evans/create-pull-request@v5
         with:
-          commit-message: "Update zebrash to ${{ env.latest_tag }}"
-          title: "Update zebrash to ${{ env.latest_tag }}"
-          body: "This PR updates the zebrash dependency to the latest version: ${{ env.latest_tag }}."
           branch: "update-zebrash-${{ env.latest_tag }}"
-          labels: "dependencies"
+          commit-message: "chore(deps): update zebrash to ${{ env.latest_tag }}"
+          title: "chore(deps): update zebrash to ${{ env.latest_tag }}"
+          body: "This PR updates **github.com/ingridhq/zebrash** to `${{ env.latest_tag }}` and runs `go mod tidy`."
+          labels: dependencies
