@@ -40,7 +40,7 @@ jobs:
             echo "update_needed=true" >> $GITHUB_ENV
           else
             echo "No update needed"
-            echo "update_needed=true" >> $GITHUB_ENV
+            echo "update_needed=false" >> $GITHUB_ENV
           fi
         
       - name: Set up Go
