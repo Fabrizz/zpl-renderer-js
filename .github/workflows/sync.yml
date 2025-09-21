@@ -1,10 +1,13 @@
 name: Sync Zebrash Version
 
-
 on:
   schedule:
     - cron: "0 0 1 * *" # Runs at midnight on the first day of every month
   workflow_dispatch: {}
+
+permissions:
+  contents: write
+  pull-requests: write
 
 jobs:
   check-and-update:
