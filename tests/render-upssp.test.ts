@@ -13,6 +13,8 @@ import fs from "node:fs";
 import { ready } from "../"
 import { join } from "node:path";
 
+// TODO: Add more tests for various ZPL inputs and edge cases
+// TODO: Actually verify the output images against known-good snapshots
 test("Renders UPS-Surepost ZPL", async () => {
   const { api } = await ready;
   const b64 = await api.zplToBase64Async(ZPL);

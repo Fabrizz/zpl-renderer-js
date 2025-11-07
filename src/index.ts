@@ -34,7 +34,7 @@ export type ZplApi = {
    * import { ready } from "zpl-renderer-js"
    * const { api } = await ready;
    * const zplImage = await api.zplToBase64Async("^XA^FO50,50^ADN,36,20^FDHello^FS^XZ");
-   * console.log(zplImage); // Base64-encoded PNG string
+   * console.log(zplImage);
    * ```
    */
   zplToBase64Async: (
@@ -43,7 +43,6 @@ export type ZplApi = {
     heightMm?: number,
     dpmm?: number
   ) => Promise<string>;
-
 };
 
 // Initialize using the namespace the Go code sets: globalThis.zpl

@@ -15,7 +15,7 @@ var (
 	renderAsyncFn js.Func
 )
 
-// --- Core render helper (bytes) ---
+// Core render helper
 func zplToPNGBytes(zpl string, widthMm, heightMm float64, dpmm int) ([]byte, error) {
 	parser := zebrash.NewParser()
 	labels, err := parser.Parse([]byte(zpl))
@@ -36,7 +36,7 @@ func zplToPNGBytes(zpl string, widthMm, heightMm float64, dpmm int) ([]byte, err
 	return buf.Bytes(), nil
 }
 
-// zpl.Render(zpl, widthMm?, heightMm?, dpmm?) -> base64 PNG string ---
+// zpl.Render(zpl, widthMm?, heightMm?, dpmm?) -> base64 PNG
 func renderBase64Basic(this js.Value, args []js.Value) any {
 	if len(args) < 1 {
 		return js.ValueOf("missing argument: zpl")
@@ -71,7 +71,6 @@ func renderBase64Basic(this js.Value, args []js.Value) any {
 }
 
 func renderBase64Async(this js.Value, args []js.Value) any {
-	// Create and return a Promise
 	promiseConstructor := js.Global().Get("Promise")
 	return promiseConstructor.New(js.FuncOf(func(this js.Value, promiseArgs []js.Value) any {
 		resolve := promiseArgs[0]
@@ -79,7 +78,7 @@ func renderBase64Async(this js.Value, args []js.Value) any {
 
 		// Run the processing in a goroutine to make it async
 		go func() {
-			// Recover from any panics and convert to Promise rejection
+			// Convert to Promise rejection
 			defer func() {
 				if r := recover(); r != nil {
 					reject.Invoke(js.Global().Get("Error").New(fmt.Sprintf("Unexpected error: %v", r)))
@@ -121,7 +120,7 @@ func renderBase64Async(this js.Value, args []js.Value) any {
 				return
 			}
 
-			// Success - resolve the promise with the base64 string
+			// Resolve the promise with the base64 string
 			resolve.Invoke(js.ValueOf(base64.StdEncoding.EncodeToString(png)))
 		}()
 
@@ -135,7 +134,7 @@ func main() {
 	// Namespace: globalThis.zpl.Render(...)
 	zplNS := global.Get("zpl")
 	if zplNS.IsUndefined() || zplNS.IsNull() {
-		zplNS = global.Get("Object").New() // {}  (better than js.ValueOf(map[...]{}))
+		zplNS = global.Get("Object").New()
 		global.Set("zpl", zplNS)
 	}
 

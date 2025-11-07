@@ -1,12 +1,12 @@
 > ZPL-Renderer-JS is a wrapper of [Zebrash by IngridHQ](https://github.com/ingridhq/zebrash)
 
-<img alt="Fabrizz Logo" src="./.github/bar-zpl.png" height="120px"/>
-
 # ZPL-Renderer-JS
 Convert Zebra ZPL labels to PNG directly in the browser (or node) without the use of third party services like Labelary or labelzoom!
 
-### Online playground
-XA Viewer has ZPL completitions/recommendations and lets you export ZPL in various image types:<br/>[<img alt="Fabrizz Logo" src="./.github/bar-xaviewer.png" height="120px"/>](https://xaviewer.fabriz.co/)
+[<img alt="Fabrizz Logo" src="./.github/bar-zpl.png" height="120px"/>](https://www.npmjs.com/package/zpl-renderer-js)
+[<img alt="Fabrizz Logo" src="./.github/bar-xaviewer.png" height="120px"/>](https://xaviewer.fabriz.co/)
+
+
 
 ## Instalation
 ```bash
@@ -25,11 +25,12 @@ The NPM package includes `.umd`, `.esm`, and `.cjs` builds. You can also find th
 
 ```ts
 import { ready } from "zpl-renderer-js"
+import fs from "node:fs";
 
 const { api } = await ready;
 const zplImage = await api.zplToBase64Async("^XA^FO50,50^ADN,36,20^FDHello^FS^XZ");
 
-console.log("Base64 PNG: ", zplImage)
+fs.writeFileSync("zpl.png", Buffer.from(zplImage, "base64"));
 ```
 
 ```ts
@@ -56,24 +57,6 @@ console.log("Base64 PNG: ", zplImage)
     heightMm?: number,
     dpmm?: number
   ) => Promise<string>;
-
-  ///////////// [OLD API, use the async variant] /////////////
-  /**
-   * Render a ZPL label into a PNG image (Base64-encoded string).
-   *
-   * @param zpl - The raw ZPL code to render.
-   * @param widthMm - Label width in millimeters. Defaults to 101.6 mm (~4 inches).
-   * @param heightMm - Label height in millimeters. Defaults to 203.2 mm (~8 inches).
-   * @param dpmm - Dots per millimeter (print resolution). Defaults to 8 (~203 DPI).
-   * @returns A Base64-encoded PNG image string representing the rendered label.
-   * @deprecated Use `zplToBase64Async` instead.
-   */
-  Render: (
-    zpl: string,
-    widthMm?: number,
-    heightMm?: number,
-    dpmm?: number
-  ) => string;
 ```
 <br/>
 
@@ -82,4 +65,4 @@ console.log("Base64 PNG: ", zplImage)
 #
 
 [<img alt="Fabrizz logo" src="./.github/fabriz.png" width="92" align="right">](https://fabriz.co)
-<p align="left">Made with <3 by Fabrizz</p>
+<p align="left">Made with 💛 by Fabrizz</p>
