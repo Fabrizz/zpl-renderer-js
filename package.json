@@ -27,25 +27,33 @@
   "jsdelivr": "dist/index.umd.js",
   "types": "dist/index.d.ts",
   "scripts": {
-    "build": "npm run build:types && node build.js",
+    "build": "node build.js && npm run build:types",
     "build:types": "tsc -p tsconfig.json",
     "build:wasm": "cd zebrash && GOOS=js GOARCH=wasm go build -o main.wasm -trimpath -buildvcs=false -ldflags=\"-s -w\" .",
-    "build:pw:wasm": "cd zebrash; $env:GOOS='js'; $env:GOARCH='wasm'; go build -o main.wasm -trimpath -buildvcs=false -ldflags='-s -w' .",
+    "build:w:wasm": "cross-env GOOS=js GOARCH=wasm go build -C zebrash -o main.wasm -trimpath -buildvcs=false -ldflags=\"-s -w\" .",
     "test": "vitest"
   },
   "files": [
     "dist/*.js",
     "dist/*.ts",
     "dist/*.wasm",
+    "dist/*.map",
+    "dist/external/*.js",
+    "dist/external/*.wasm",
+    "dist/external/*.map",
     "README.md",
     "LICENSE"
   ],
   "devDependencies": {
     "@types/node": "^24.2.0",
+    "cross-env": "^10.1.0",
     "esbuild": "^0.25.8",
+    "happy-dom": "^20.0.10",
+    "jsdom": "^27.1.0",
     "typescript": "^5.9.2",
     "vite-plugin-top-level-await": "^1.6.0",
     "vite-plugin-wasm": "^3.5.0",
+    "vite-tsconfig-paths": "^5.1.4",
     "vitest": "^3.2.4"
   },
   "exports": {
@@ -53,6 +61,10 @@
       "types": "./dist/index.d.ts",
       "require": "./dist/index.cjs.js",
       "import": "./dist/index.esm.js"
+    },
+    "./external": {
+      "types": "./dist/external/index.d.ts",
+      "import": "./dist/external/index.js"
     },
     "./zebrash.wasm": "./dist/zebrash.wasm"
   },

@@ -9,6 +9,8 @@
     "strict": true,
     "moduleResolution": "node",
     "skipLibCheck": true,
+    "allowSyntheticDefaultImports": true,
+    "verbatimModuleSyntax": true,
     "esModuleInterop": true
   },
   "include": ["src", "types"]

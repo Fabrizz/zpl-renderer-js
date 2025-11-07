@@ -10,7 +10,7 @@ import fs from "node:fs";
 (globalThis as any).TextEncoder ??= TextEncoder;
 (globalThis as any).TextDecoder ??= TextDecoder;
 
-import { ready } from "../"
+import { ready } from "zpl-renderer-js";
 import { join } from "node:path";
 
 test("[DEPRECATED] Renders zpl", async () => {

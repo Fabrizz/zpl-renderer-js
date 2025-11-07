@@ -1,4 +1,3 @@
-// build.cjs
 /* eslint-disable */
 const { build } = require("esbuild");
 const fs = require("fs");
@@ -85,6 +84,16 @@ async function main() {
         globalName: "zpljs",
       }),
     ]);
+    await runBuild({
+      ...shared,
+      loader: { ".wasm": "file" },
+      format: "esm",
+      outdir: "dist/external",
+      platform: "browser",
+      assetNames: "[name]-[hash]",
+      entryPoints: ["src/index.ts"],
+    });
+
     console.log("JS Build completed.\n");
   } catch (err) {
     console.error(err);
@@ -94,9 +103,12 @@ async function main() {
 
 (async () => {
   try {
+    if (fs.existsSync("dist")) {
+      fs.rmSync("dist", { recursive: true, force: true });
+      console.log("Deleted old dist/ folder.");
+    }
     await main();
-    await emitWasmFile();
-    console.log("✅ Build complete. (base64 + raw WASM).\n\n");
+    console.log("✅ Build complete.\n\n");
   } catch (e) {
     console.log("❌ Build failed.");
     console.error(e);
