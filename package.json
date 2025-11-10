@@ -27,7 +27,7 @@
   "jsdelivr": "dist/index.umd.js",
   "types": "dist/index.d.ts",
   "scripts": {
-    "build": "node build.js && npm run build:types",
+    "build": "npm run build:types && node build.js",
     "build:types": "tsc -p tsconfig.json",
     "build:wasm": "cd zebrash && GOOS=js GOARCH=wasm go build -o main.wasm -trimpath -buildvcs=false -ldflags=\"-s -w\" .",
     "build:w:wasm": "cross-env GOOS=js GOARCH=wasm go build -C zebrash -o main.wasm -trimpath -buildvcs=false -ldflags=\"-s -w\" .",

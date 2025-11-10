@@ -1,4 +1,3 @@
-
 import "./wasm_exec.js";
 import { initGoWasm } from "./wasm-wrapper";
 
@@ -45,12 +44,41 @@ export type ZplApi = {
   ) => Promise<string>;
 };
 
+let boot: Promise<{ api: ZplApi }> | null = null;
+let isReadyInstantInit = true;
+
 // Initialize using the namespace the Go code sets: globalThis.zpl
-export const ready: Promise<{ api: ZplApi }> = (async () => {
-  const { api } = await initGoWasm<ZplApi>({ namespace: "zpl" });
-  if (!api) throw new Error("Zpl API not found on globalThis.zpl");
-  return { api };
-})();
+export function initZpl(opts: { wasmUrl?: string } = {}) {
+
+  // For now keep two modes and remove in the future
+  if (isReadyInstantInit && Object.keys(opts).length > 0) {
+    //console.debug("Custom initZpl, restarting zpl instance");
+    boot = null;
+    isReadyInstantInit = false;
+  }
+
+  if (!boot) {
+    boot = (async () => {
+      const { api } = await initGoWasm<ZplApi>({ namespace: "zpl", ...opts });
+      if (!api) throw new Error("Zpl API not found on globalThis.zpl");
+      return { api };
+    })();
+  }
+  
+  return boot;
+}
+
+/* 
+ * Backward compatibility, triggers on import
+ * Problems when not tree-shakeen away, as initZpl will always be called twice
+ * Ignoring new inits with different options.
+ * 
+ * Should I break this and force users to switch
+ * or should I let users do initZpl reloading with custom opts?
+ * 
+ * @deprecated Use initZpl() instead. This will be removed in future versions.
+ */
+export const ready: Promise<{ api: ZplApi }> = initZpl();
 
 export async function getApi(): Promise<ZplApi> {
   return (await ready).api;

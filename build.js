@@ -62,6 +62,20 @@ async function emitWasmFile() {
   console.log("Emitted", wasmFile.path);
 }
 
+async function copyTstoExternal() {
+  const src = path.join("dist", "index.d.ts");
+  const dstDir = path.join("dist", "external");
+  const dst = path.join(dstDir, "index.d.ts");
+
+  if (!fs.existsSync(src)) {
+    throw new Error(`Types not found: ${src}. External build failed.`);
+  }
+
+  fs.mkdirSync(dstDir, { recursive: true });
+  fs.copyFileSync(src, dst);
+  console.log(`Types copied for "external" build --> ${dst}`);
+}
+
 async function main() {
   try {
     await Promise.all([
@@ -94,6 +108,20 @@ async function main() {
       entryPoints: ["src/index.ts"],
     });
 
+    await copyTstoExternal();
+    /* 
+     * await emitWasmFile();
+     *
+     * I will stop including it in the package as the go 
+     * wasm_exec is needed and at that point grabbing it from
+     * the package does not make sense.
+     * 
+     * If you need the wasm, you can either:
+     * - Build it directly from go in the zebrash/ folder
+     * - Get it from the github artifacts. // TODO
+     * - Use the one inside /external build.
+     */
+
     console.log("JS Build completed.\n");
   } catch (err) {
     console.error(err);
@@ -103,10 +131,6 @@ async function main() {
 
 (async () => {
   try {
-    if (fs.existsSync("dist")) {
-      fs.rmSync("dist", { recursive: true, force: true });
-      console.log("Deleted old dist/ folder.");
-    }
     await main();
     console.log("✅ Build complete.\n\n");
   } catch (e) {

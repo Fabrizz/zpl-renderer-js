@@ -38,7 +38,7 @@ async function bytesFromRef(ref: string): Promise<Uint8Array> {
   return decodeBase64Universal(ref);
 }
 
-type InitOptions<TApi> = {
+export type InitOptions = {
   argv?: string[];
   env?: Record<string, string>;
   namespace?: string;
@@ -47,7 +47,7 @@ type InitOptions<TApi> = {
 };
 
 export async function initGoWasm<TApi = Record<string, unknown>>(
-  opts: InitOptions<TApi> = {}
+  opts: InitOptions = {}
 ) {
   if (typeof globalThis.Go !== "function") {
     throw new Error("Go runtime not found — load your bundled wasm_exec.js first");
