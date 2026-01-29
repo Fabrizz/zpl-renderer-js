@@ -11,7 +11,7 @@ import { TextEncoder, TextDecoder } from "node:util";
 
 import { ZEBRASH_VERSION } from "zpl-renderer-js"
 
-test("Renders UPS-Surepost ZPL", async () => {
+test("Read Zebrash version", async () => {
   console.log(`Using zebrash version: ${ZEBRASH_VERSION}`);
 
   expect(typeof ZEBRASH_VERSION).toBe("string");
