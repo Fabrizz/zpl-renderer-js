@@ -129,6 +129,99 @@ func renderBase64Async(this js.Value, args []js.Value) any {
 	}))
 }
 
+// --- Multi-label render helper (bytes): one PNG per label ---
+func zplToPNGsBytesAll(zpl string, widthMm, heightMm float64, dpmm int) ([][]byte, error) {
+	parser := zebrash.NewParser()
+	labels, err := parser.Parse([]byte(zpl))
+	if err != nil {
+		return nil, err
+	}
+	if len(labels) == 0 {
+		return nil, fmt.Errorf("no labels parsed")
+	}
+
+	drawer := zebrash.NewDrawer()
+	opts := drawers.DrawerOptions{
+		LabelWidthMm:  widthMm,
+		LabelHeightMm: heightMm,
+		Dpmm:          dpmm,
+	}
+
+	out := make([][]byte, 0, len(labels))
+	for i := range labels {
+		var buf bytes.Buffer
+		if err := drawer.DrawLabelAsPng(labels[i], &buf, opts); err != nil {
+			return nil, fmt.Errorf("error rendering label %d: %w", i, err)
+		}
+		// Copy buffer bytes (safe even though buf will be GC'd)
+		b := buf.Bytes()
+		cp := make([]byte, len(b))
+		copy(cp, b)
+		out = append(out, cp)
+	}
+
+	return out, nil
+}
+
+// --- JS export: Promise<string[]> (base64 PNGs), one per label ---
+func renderBase64MultipleAsync(this js.Value, args []js.Value) any {
+	promiseConstructor := js.Global().Get("Promise")
+	return promiseConstructor.New(js.FuncOf(func(this js.Value, promiseArgs []js.Value) any {
+		resolve := promiseArgs[0]
+		reject := promiseArgs[1]
+
+		go func() {
+			defer func() {
+				if r := recover(); r != nil {
+					reject.Invoke(js.Global().Get("Error").New(fmt.Sprintf("Unexpected error: %v", r)))
+				}
+			}()
+
+			if len(args) < 1 {
+				reject.Invoke(js.Global().Get("Error").New("Missing argument: zpl"))
+				return
+			}
+
+			zpl := args[0].String()
+
+			// Defaults: 101.6 × 203.2 mm @ 8 dpmm (~203 DPI)
+			widthMm := 101.6
+			heightMm := 203.2
+			dpmm := 8
+
+			if len(args) > 1 && args[1].Type() == js.TypeNumber {
+				widthMm = args[1].Float()
+			}
+			if len(args) > 2 && args[2].Type() == js.TypeNumber {
+				heightMm = args[2].Float()
+			}
+			if len(args) > 3 && args[3].Type() == js.TypeNumber {
+				dpmm = args[3].Int()
+			}
+
+			pngs, err := zplToPNGsBytesAll(zpl, widthMm, heightMm, dpmm)
+			if err != nil {
+				reject.Invoke(js.Global().Get("Error").New("Error rendering: " + err.Error()))
+				return
+			}
+			if len(pngs) == 0 {
+				reject.Invoke(js.Global().Get("Error").New("No labels parsed"))
+				return
+			}
+
+			// Convert [][]byte -> JS Array of base64 strings
+			arr := js.Global().Get("Array").New(len(pngs))
+			for i, png := range pngs {
+				arr.SetIndex(i, base64.StdEncoding.EncodeToString(png))
+			}
+
+			resolve.Invoke(arr)
+		}()
+
+		return nil
+	}))
+}
+
 func main() {
 	global := js.Global()
 
@@ -146,6 +239,10 @@ func main() {
 	// New async API: globalThis.zpl.zplToBase64Async(...)
 	renderAsyncFn = js.FuncOf(renderBase64Async)
 	zplNS.Set("zplToBase64Async", renderAsyncFn)
+
+	// New async multi-label API: globalThis.zpl.zplToBase64AllAsync(...)
+	renderMultipleAsyncFn := js.FuncOf(renderBase64MultipleAsync)
+	zplNS.Set("zplToBase64MultipleAsync", renderMultipleAsyncFn)
 
 	select {}
 }

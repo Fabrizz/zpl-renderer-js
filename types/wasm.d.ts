@@ -4,4 +4,5 @@ declare module "*.wasm" {
   export default wasmB64;
 }
 
+/** Current Zebrash version */
 declare const __ZEBRASH_VERSION__: string;
