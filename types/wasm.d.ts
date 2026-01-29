@@ -3,3 +3,5 @@ declare module "*.wasm" {
   const wasmB64: string;
   export default wasmB64;
 }
+
+declare const __ZEBRASH_VERSION__: string;

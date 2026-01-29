@@ -2,6 +2,8 @@
 import "./wasm_exec.js";
 import { initGoWasm } from "./wasm-wrapper";
 
+export const ZEBRASH_VERSION = __ZEBRASH_VERSION__ || "";
+
 export type ZplApi = {
   /**
    * Render a ZPL label into a PNG image (Base64-encoded string).

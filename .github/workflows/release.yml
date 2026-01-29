@@ -57,10 +57,14 @@ jobs:
       - name: Build
         run: npm run build
 
-      - name: Create GitHub release (changelogithub)
-        run: npx changelogithub
+      - name: Create GitHub Release (auto notes + artifacts)
+        run: |
+          gh release create "${GITHUB_REF_NAME}" \
+            --verify-tag \
+            --generate-notes \
+            dist/*
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Publish to NPM
         run: npm publish --access public --no-git-checks
