@@ -4,7 +4,7 @@
   "author": "Fabrizio",
   "license": "MIT",
   "description": "Render ZPL (Zebra Programming Language) to PNG in the browser! Without Labelary or any third-party service.",
-  "homepage": "https://github.com/Fabrizz/zpl-renderer-js",
+  "homepage": "https://xaviewer.fabriz.co/",
   "keywords": [
     "zpl",
     "zebra",
@@ -24,18 +24,19 @@
   "main": "dist/index.cjs.js",
   "module": "dist/index.esm.js",
   "unpkg": "dist/index.umd.js",
+  "jsdelivr": "dist/index.umd.js",
   "types": "dist/index.d.ts",
   "scripts": {
     "build": "npm run build:types && node build.js",
     "build:types": "tsc -p tsconfig.json",
     "build:wasm": "cd zebrash && GOOS=js GOARCH=wasm go build -o main.wasm -trimpath -buildvcs=false -ldflags=\"-s -w\" .",
     "build:pw:wasm": "cd zebrash; $env:GOOS='js'; $env:GOARCH='wasm'; go build -o main.wasm -trimpath -buildvcs=false -ldflags='-s -w' .",
+    "build:w:wasm": "cross-env GOOS=js GOARCH=wasm go build -C zebrash -o main.wasm -trimpath -buildvcs=false -ldflags=\"-s -w\" .",
     "test": "vitest"
   },
   "files": [
     "dist/*.js",
-    "dist/*.ts",
-    "dist/*.wasm"
+    "dist/*.ts"
   ],
   "devDependencies": {
     "@types/node": "^24.2.0",
@@ -50,8 +51,7 @@
       "types": "./dist/index.d.ts",
       "require": "./dist/index.cjs.js",
       "import": "./dist/index.esm.js"
-    },
-    "./zebrash.wasm": "./dist/zebrash.wasm"
+    }
   },
   "repository": {
     "type": "git",

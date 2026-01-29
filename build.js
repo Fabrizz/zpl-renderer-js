@@ -1,4 +1,3 @@
-// build.cjs
 /* eslint-disable */
 const { build } = require("esbuild");
 const fs = require("fs");
@@ -36,12 +35,16 @@ function formatBytes(bytes) {
   return `${bytes.toFixed(2)} ${units[i]}`;
 }
 
+
 async function runBuild(options) {
   const result = await build(options);
   const outputs = Object.entries(result.metafile.outputs);
+  let totalBytes = 0;
   outputs.forEach(([file, meta]) => {
     console.log(`*** ${file} - ${formatBytes(meta.bytes)}`);
+    totalBytes += meta.bytes;
   });
+  return totalBytes;
 }
 
 async function emitWasmFile() {
@@ -64,8 +67,9 @@ async function emitWasmFile() {
 }
 
 async function main() {
+  let bt = 0;
   try {
-    await Promise.all([
+    const results = await Promise.all([
       runBuild({
         ...shared,
         format: "cjs",
@@ -85,7 +89,8 @@ async function main() {
         globalName: "zpljs",
       }),
     ]);
-    console.log("JS Build completed.\n");
+    bt = results.reduce((a, b) => a + b, 0);
+    console.log(`Total size: ${formatBytes(bt)}\n`);
   } catch (err) {
     console.error(err);
     process.exit(1);
@@ -95,8 +100,8 @@ async function main() {
 (async () => {
   try {
     await main();
-    await emitWasmFile();
-    console.log("✅ Build complete. (base64 + raw WASM).\n\n");
+    // await emitWasmFile();
+    console.log("✅ Build complete. \n\n");
   } catch (e) {
     console.log("❌ Build failed.");
     console.error(e);

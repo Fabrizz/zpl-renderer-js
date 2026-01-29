@@ -34,7 +34,7 @@ export type ZplApi = {
    * import { ready } from "zpl-renderer-js"
    * const { api } = await ready;
    * const zplImage = await api.zplToBase64Async("^XA^FO50,50^ADN,36,20^FDHello^FS^XZ");
-   * console.log(zplImage); // Base64-encoded PNG string
+   * console.log(zplImage);
    * ```
    */
   zplToBase64Async: (
@@ -46,7 +46,6 @@ export type ZplApi = {
 
 };
 
-// Initialize using the namespace the Go code sets: globalThis.zpl
 export const ready: Promise<{ api: ZplApi }> = (async () => {
   const { api } = await initGoWasm<ZplApi>({ namespace: "zpl" });
   if (!api) throw new Error("Zpl API not found on globalThis.zpl");
