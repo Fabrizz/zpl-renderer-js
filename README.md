@@ -27,7 +27,7 @@ The NPM package includes `.umd`, `.esm`, and `.cjs` builds. You can find the raw
 > [!NOTE]
 > Loading the library in a web worker is also recommended and more so if you are planning on doing multiple renderings in a short time span. <br/> For now, you need to use a WebWorker manually. An example WebWorker can be found in `examples/1-zpl-web-worker.ts` and a consumer react component in `examples/1-zpl-ww-consumer.tsx`
 
-### Rendering a single label (Original API)
+### Rendering a single label (Original)
 ```ts
 import { ready } from "zpl-renderer-js"
 import fs from "node:fs";
@@ -51,6 +51,7 @@ for (const label in labels) {
 }
 ```
 
+### ZplApi
 ```ts
   /**
    * Asynchronously render a ZPL label into a PNG image (Base64-encoded string).
