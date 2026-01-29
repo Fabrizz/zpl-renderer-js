@@ -1,15 +1,13 @@
 module Zebrash-WASM
 
-go 1.24.0
+go 1.25
 
-toolchain go1.24.6
-
-require github.com/ingridhq/zebrash v1.27.2
+require github.com/ingridhq/zebrash v1.33.0
 
 require (
-	github.com/fogleman/gg v1.3.0 // indirect
 	github.com/golang/freetype v0.0.0-20170609003504-e2365dfdc4a0 // indirect
-	github.com/ingridhq/maxicode v1.4.0 // indirect
-	golang.org/x/image v0.15.0 // indirect
-	golang.org/x/text v0.14.0 // indirect
+	github.com/ingridhq/gg v1.4.1 // indirect
+	github.com/ingridhq/maxicode v1.5.0 // indirect
+	golang.org/x/image v0.35.0 // indirect
+	golang.org/x/text v0.33.0 // indirect
 )
