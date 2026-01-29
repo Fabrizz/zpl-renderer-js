@@ -1,6 +1,6 @@
 {
   "name": "zpl-renderer-js",
-  "version": "2.2.0",
+  "version": "2.2.1",
   "author": "Fabrizio",
   "license": "MIT",
   "description": "Render ZPL (Zebra Programming Language) to PNG in the browser! Without Labelary or any third-party service.",
