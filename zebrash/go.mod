@@ -4,7 +4,7 @@ go 1.24.0
 
 toolchain go1.24.6
 
-require github.com/ingridhq/zebrash v1.26.5
+require github.com/ingridhq/zebrash v1.27.2
 
 require (
 	github.com/fogleman/gg v1.3.0 // indirect
