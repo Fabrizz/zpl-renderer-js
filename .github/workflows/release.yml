@@ -16,7 +16,6 @@ jobs:
         with:
           fetch-depth: 0
 
-      # Install Go from the module's go.mod (recommended), with caching
       - uses: actions/setup-go@v5
         with:
           go-version-file: ./zebrash/go.mod
@@ -53,21 +52,29 @@ jobs:
             exit 1
           fi
 
-      # JS Build with zebrash/main.wasm
       - name: Build
         run: npm run build
 
       - name: Test
         run: npm test
 
-      - name: Create GitHub Release (auto notes + artifacts)
+      - name: Compute release title
+        id: meta
+        run: |
+          RELEASE_VERSION="${GITHUB_REF_NAME#v}"
+          ZEBRASH_VERSION=$(awk '/^module[[:space:]]+/ {print $2; exit}' zebrash/go.mod)
+
+          # Export para pasos siguientes
+          echo "release_version=$RELEASE_VERSION" >> "$GITHUB_OUTPUT"
+          echo "zebrash_version=$ZEBRASH_VERSION" >> "$GITHUB_OUTPUT"
+          echo "release_title=${RELEASE_VERSION} | Z: ${ZEBRASH_VERSION}" >> "$GITHUB_OUTPUT"
+
+      - name: Create GitHub Release (auto notes, no artifacts)
         run: |
           gh release create "${GITHUB_REF_NAME}" \
             --verify-tag \
             --generate-notes \
-            dist/*
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+            --title "${{ steps.meta.outputs.release_title }}"
 
       - name: Publish to NPM
         run: npm publish
