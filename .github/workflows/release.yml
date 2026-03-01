@@ -11,6 +11,8 @@ on:
 jobs:
   release:
     runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -68,8 +70,6 @@ jobs:
           echo "release_title=${RELEASE_VERSION} | Z: ${ZEBRASH_VERSION}" >> "$GITHUB_OUTPUT"
 
       - name: Create GitHub Release
-        env:
-          GH_TOKEN: ${{ github.token }}
         run: |
           gh release create "${GITHUB_REF_NAME}" \
             --verify-tag \
