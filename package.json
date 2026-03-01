@@ -55,6 +55,6 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/Fabrizz/zpl-renderer-js"
+    "url": "git+https://github.com/Fabrizz/zpl-renderer-js.git"
   }
 }
