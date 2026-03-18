@@ -2,7 +2,7 @@ module Zebrash-WASM
 
 go 1.25
 
-require github.com/ingridhq/zebrash v1.35.1
+require github.com/ingridhq/zebrash v1.36.1
 
 require (
 	github.com/golang/freetype v0.0.0-20170609003504-e2365dfdc4a0 // indirect
