@@ -11,3 +11,5 @@ require (
 	golang.org/x/image v0.35.0 // indirect
 	golang.org/x/text v0.33.0 // indirect
 )
+
+replace github.com/ingridhq/zebrash v1.35.1 => ./zebrash-local
