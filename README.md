@@ -1,7 +1,9 @@
-> ZPL-Renderer-JS is a wrapper of [Zebrash by IngridHQ](https://github.com/ingridhq/zebrash)
+# ZPL-Renderer-JS (Fork)
 
-# ZPL-Renderer-JS
-Convert Zebra ZPL labels to PNG directly in the browser (or node) without the use of third party services like Labelary or labelzoom!, supports multiple labels with templates!
+This is a **fork** of [zpl-renderer-js](https://github.com/Fabrizz/zpl-renderer-js), a wrapper of [Zebrash by IngridHQ](https://github.com/ingridhq/zebrash). Convert Zebra ZPL labels to PNG **in the browser** or in Node.js—without third-party services like Labelary or labelzoom!, with support for multiple labels and templates.
+
+> [!IMPORTANT]  
+> **Barcode rendering fix** — This fork fixes upstream issues with **Code 128** barcodes (No-mode, ZPL escape `>5` for subset C). The fix is implemented **entirely in the WASM build** by vendoring a patched [Zebrash](https://github.com/ingridhq/zebrash) (`zebrash/zebrash-local/`). Previously, `>5` (switch to Code C) was mishandled: long digit sequences were encoded one character at a time instead of as digit pairs, making barcodes far too wide and causing overflow. With this fork, barcode width matches real Zebra hardware and Labelary. **Usable in the browser** — the WASM is inlined into the JS build; no external service or server is required.
 
 [<img alt="Fabrizz Logo" src="./.github/bar-zpl.png" height="110px"/>](https://www.npmjs.com/package/zpl-renderer-js)
 [<img alt="Fabrizz Logo" src="./.github/bar-xaviewer.png" height="110px"/>](https://xaviewer.fabriz.co/)
@@ -18,7 +20,7 @@ npm i zpl-renderer-js
 ```
 
 ## Usage
-The NPM package includes `.umd`, `.esm`, and `.cjs` builds. You can find the raw WASM in the Github Releases.
+The NPM package includes `.umd`, `.esm`, and `.cjs` builds. **Runs fully in the browser** — no server or external API needed; the WASM runtime is inlined. You can find the raw WASM in the Github Releases.
 > In case of using the raw `WASM` you will need to load `src/wasm_exec.js` and create a wrapper for the function.
 
 > [!WARNING]  
