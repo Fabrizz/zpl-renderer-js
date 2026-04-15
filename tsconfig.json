@@ -5,11 +5,13 @@
     "module": "ESNext",
     "declaration": true,
     "emitDeclarationOnly": true,
+    "rootDir": "./src",
     "outDir": "dist",
     "strict": true,
-    "moduleResolution": "node",
     "skipLibCheck": true,
-    "esModuleInterop": true
+    "esModuleInterop": true,
+    "verbatimModuleSyntax": true
   },
-  "include": ["src", "types"]
+  "include": ["src", "types"],
+  "exclude": ["node_modules", "dist", "web"]
 }

@@ -70,6 +70,20 @@ function readZebrashVersionFromGoMod() {
   return `v${m[1]}`;
 }
 
+function copyWasmExecTypes() {
+  const srcPath = path.join(__dirname, "src", "wasm_exec.d.ts");
+  const destPath = path.join(__dirname, "dist", "wasm_exec.d.ts");
+
+  if (fs.existsSync(srcPath)) {
+    // Ensure dist directory exists
+    fs.mkdirSync(path.dirname(destPath), { recursive: true });
+    fs.copyFileSync(srcPath, destPath);
+    console.log(`Copied wasm_exec.d.ts to dist/`);
+  } else {
+    console.warn(`Warning: ${srcPath} not found. Skipping type copy.`);
+  }
+}
+
 /////////////////////////////////////////////////////////////////////// Build
 const zebrashVersion = readZebrashVersionFromGoMod();
 
@@ -132,6 +146,7 @@ async function main() {
 (async () => {
   try {
     await main();
+    copyWasmExecTypes();
     // await emitWasmFile();
     console.log("Build complete. \n\n");
   } catch (e) {
