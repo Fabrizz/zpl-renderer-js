@@ -3,12 +3,12 @@
 # ZPL-Renderer-JS
 Convert Zebra ZPL labels to PNG directly in the browser (or node) without the use of third party services like Labelary or labelzoom!, supports multiple labels with templates!
 
-[<img alt="Fabrizz Logo" src="./.github/bar-zpl.png" height="110px"/>](https://www.npmjs.com/package/zpl-renderer-js)
-[<img alt="Fabrizz Logo" src="./.github/bar-xaviewer.png" height="110px"/>](https://xaviewer.fabriz.co/)
+[<img alt="Fabriz Logo" src="./.github/bar-zpl.png" height="110px"/>](https://www.npmjs.com/package/zpl-renderer-js)
+[<img alt="Fabriz Logo" src="./.github/bar-xaviewer.png" height="110px"/>](https://xaviewer.fabriziob.com/)
 
 
 ## Web Editor
-You can use the full in-browser ZPL viewer+editor here: https://xaviewer.fabriz.co/
+You can use the full in-browser ZPL viewer+editor here: https://xaviewer.fabriziob.com/
 > Source code for XaViewer will be put public soon!
 
 
@@ -90,9 +90,9 @@ for (const label in labels) {
 ```
 <br/>
 
-<img alt="Fabrizz logo" src="./.github/logo.png" width="92"><br/>
+<img alt="Fabriz logo" src="./.github/logo.png" width="92"><br/>
 
 #
 
-[<img alt="Fabrizz logo" src="./.github/fabriz.png" width="92" align="right">](https://fabriz.co)
-<p align="left">Made with 💛 by Fabrizz</p>
+[<img alt="Fabriz logo" src="./.github/fabriz.png" width="92" align="right">](https://fabriziob.com)
+<p align="left">Made with 💛 by Fabrizio</p>
