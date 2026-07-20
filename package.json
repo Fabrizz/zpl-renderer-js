@@ -1,7 +1,7 @@
 {
   "name": "zpl-renderer-js",
   "version": "3.4.0",
-  "author": "Fabrizio",
+  "author": "Fabrizio Bap",
   "license": "MIT",
   "description": "Render ZPL (Zebra Programming Language) to PNG in the browser! Without Labelary or any third-party service.",
   "homepage": "https://xaviewer.fabriziob.com/",
@@ -39,12 +39,12 @@
     "dist/*.ts"
   ],
   "devDependencies": {
-    "@types/node": "^24.2.0",
-    "esbuild": "^0.25.8",
-    "typescript": "^5.9.2",
+    "@types/node": "^26.1.1",
+    "esbuild": "^0.28.1",
+    "typescript": "^7.0.2",
     "vite-plugin-top-level-await": "^1.6.0",
-    "vite-plugin-wasm": "^3.5.0",
-    "vitest": "^3.2.4"
+    "vite-plugin-wasm": "^3.6.0",
+    "vitest": "^4.1.10"
   },
   "exports": {
     ".": {
