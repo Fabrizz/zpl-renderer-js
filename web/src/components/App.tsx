@@ -67,6 +67,12 @@ function App() {
     }
     setHmm(h);
   }
+
+  function setUnit(unit: string) {
+    setLabelUnit(unit);
+    setWidth(labelWidth, unit);
+    setHeight(labelHeight, unit);
+  }
   function setDensity(d: number) {
     setPrintDensity(d);
     setDpmm(d);
@@ -76,9 +82,6 @@ function App() {
     setRotation(0);
     toast.info("Label rotation is not yet implemented.", { duration: 4000 });
   }
-
-  // TODO WHEN INCH/CM/MM CHANGES RERUN SET-HEIGHT/WIDHT
-
 
   function dwZpl() {
     if (!zpl) {
@@ -321,14 +324,13 @@ function App() {
                         </div>
                       </div>
                     </div>
-                    <Select onValueChange={(e) => { setLabelUnit(e) }}>
+                    <Select onValueChange={setUnit}>
                       <SelectTrigger
                         id="alignment"
                         aria-label="alignment"
                         className='w-15 h-8!'
                         value={labelUnit}
-                        disabled
-                      >
+                        >
                         <SelectValue placeholder={"in"} />
                       </SelectTrigger>
                       <SelectContent >
