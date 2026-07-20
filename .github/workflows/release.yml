@@ -62,9 +62,10 @@ jobs:
 
       - name: Compute release title
         id: meta
+        working-directory: zebrash
         run: |
           RELEASE_VERSION="${GITHUB_REF_NAME#v}"
-          ZEBRASH_VERSION=$(awk '/^module[[:space:]]+/ {print $2; exit}' zebrash/go.mod)
+          ZEBRASH_VERSION=$(go list -m -f '{{.Version}}' github.com/ingridhq/zebrash)
           echo "release_version=$RELEASE_VERSION" >> "$GITHUB_OUTPUT"
           echo "zebrash_version=$ZEBRASH_VERSION" >> "$GITHUB_OUTPUT"
           echo "release_title=${RELEASE_VERSION} | Z: ${ZEBRASH_VERSION}" >> "$GITHUB_OUTPUT"
