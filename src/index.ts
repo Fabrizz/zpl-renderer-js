@@ -4,6 +4,7 @@ import { initGoWasm } from "./wasm-wrapper";
 import type { ZplApi, RenderOptions } from "./api-types";
 
 export const ZEBRASH_VERSION = __ZEBRASH_VERSION__ || "";
+export const ZPL_RENDERER_VERSION = __ZPL_RENDERER_VERSION__ || "";
 
 export type { ZplApi, RenderOptions };
 

@@ -6,3 +6,6 @@ declare module "*.wasm" {
 
 /** Current Zebrash version */
 declare const __ZEBRASH_VERSION__: string;
+
+/** Current ZPL renderer version */
+declare const __ZPL_RENDERER_VERSION__: string;

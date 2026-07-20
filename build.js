@@ -73,8 +73,16 @@ function copyWasmExecTypes() {
   }
 }
 
+function readZplRendererVersionFromPackageJson() {
+  const pkgPath = path.join(__dirname, "package.json");
+  const pkg = JSON.parse(fs.readFileSync(pkgPath, "utf8"));
+  if (!pkg.version) throw new Error(`No "version" found in ${pkgPath}`);
+  return pkg.version;
+}
+
 /////////////////////////////////////////////////////////////////////// Build
 const zebrashVersion = readZebrashVersionFromGoMod();
+const zplRendererVersion = readZplRendererVersionFromPackageJson();
 
 const licenseBanner = `/*!
  * zpl-renderer-js - 2025 Fabrizio <3
@@ -98,6 +106,7 @@ const shared = {
   legalComments: "eof",
   define: {
     __ZEBRASH_VERSION__: JSON.stringify(zebrashVersion),
+    __ZPL_RENDERER_VERSION__: JSON.stringify(zplRendererVersion),
   },
 };
 
