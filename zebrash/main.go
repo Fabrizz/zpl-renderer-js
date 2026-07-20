@@ -15,8 +15,23 @@ var (
 	renderAsyncFn js.Func
 )
 
+// parseRenderOptions reads an optional trailing { enableInvertedLabels?, grayscaleOutput? }
+// object from args[idx]. Absent fields (or a missing/non-object arg) default to false.
+func parseRenderOptions(args []js.Value, idx int) (enableInvertedLabels bool, grayscaleOutput bool) {
+	if len(args) > idx && args[idx].Type() == js.TypeObject {
+		opts := args[idx]
+		if v := opts.Get("enableInvertedLabels"); v.Type() == js.TypeBoolean {
+			enableInvertedLabels = v.Bool()
+		}
+		if v := opts.Get("grayscaleOutput"); v.Type() == js.TypeBoolean {
+			grayscaleOutput = v.Bool()
+		}
+	}
+	return
+}
+
 // --- Core render helper (bytes) ---
-func zplToPNGBytes(zpl string, widthMm, heightMm float64, dpmm int) ([]byte, error) {
+func zplToPNGBytes(zpl string, widthMm, heightMm float64, dpmm int, enableInvertedLabels, grayscaleOutput bool) ([]byte, error) {
 	parser := zebrash.NewParser()
 	labels, err := parser.Parse([]byte(zpl))
 	if err != nil || len(labels) == 0 {
@@ -26,9 +41,11 @@ func zplToPNGBytes(zpl string, widthMm, heightMm float64, dpmm int) ([]byte, err
 	var buf bytes.Buffer
 	drawer := zebrash.NewDrawer()
 	opts := drawers.DrawerOptions{
-		LabelWidthMm:  widthMm,
-		LabelHeightMm: heightMm,
-		Dpmm:          dpmm,
+		LabelWidthMm:         widthMm,
+		LabelHeightMm:        heightMm,
+		Dpmm:                 dpmm,
+		EnableInvertedLabels: enableInvertedLabels,
+		GrayscaleOutput:      grayscaleOutput,
 	}
 	if err := drawer.DrawLabelAsPng(labels[0], &buf, opts); err != nil {
 		return nil, err
@@ -59,7 +76,7 @@ func renderBase64Basic(this js.Value, args []js.Value) any {
 		dpmm = args[3].Int()
 	}
 
-	png, err := zplToPNGBytes(zpl, widthMm, heightMm, dpmm)
+	png, err := zplToPNGBytes(zpl, widthMm, heightMm, dpmm, false, false)
 	if err != nil {
 		return js.ValueOf("draw error: " + err.Error())
 	}
@@ -110,8 +127,10 @@ func renderBase64Async(this js.Value, args []js.Value) any {
 				dpmm = args[3].Int()
 			}
 
+			enableInvertedLabels, grayscaleOutput := parseRenderOptions(args, 4)
+
 			// Process the ZPL
-			png, err := zplToPNGBytes(zpl, widthMm, heightMm, dpmm)
+			png, err := zplToPNGBytes(zpl, widthMm, heightMm, dpmm, enableInvertedLabels, grayscaleOutput)
 			if err != nil {
 				reject.Invoke(js.Global().Get("Error").New("Error rendering: " + err.Error()))
 				return
@@ -130,7 +149,7 @@ func renderBase64Async(this js.Value, args []js.Value) any {
 }
 
 // --- Multi-label render helper (bytes): one PNG per label ---
-func zplToPNGsBytesAll(zpl string, widthMm, heightMm float64, dpmm int) ([][]byte, error) {
+func zplToPNGsBytesAll(zpl string, widthMm, heightMm float64, dpmm int, enableInvertedLabels, grayscaleOutput bool) ([][]byte, error) {
 	parser := zebrash.NewParser()
 	labels, err := parser.Parse([]byte(zpl))
 	if err != nil {
@@ -142,9 +161,11 @@ func zplToPNGsBytesAll(zpl string, widthMm, heightMm float64, dpmm int) ([][]byt
 
 	drawer := zebrash.NewDrawer()
 	opts := drawers.DrawerOptions{
-		LabelWidthMm:  widthMm,
-		LabelHeightMm: heightMm,
-		Dpmm:          dpmm,
+		LabelWidthMm:         widthMm,
+		LabelHeightMm:        heightMm,
+		Dpmm:                 dpmm,
+		EnableInvertedLabels: enableInvertedLabels,
+		GrayscaleOutput:      grayscaleOutput,
 	}
 
 	out := make([][]byte, 0, len(labels))
@@ -199,7 +220,9 @@ func renderBase64MultipleAsync(this js.Value, args []js.Value) any {
 				dpmm = args[3].Int()
 			}
 
-			pngs, err := zplToPNGsBytesAll(zpl, widthMm, heightMm, dpmm)
+			enableInvertedLabels, grayscaleOutput := parseRenderOptions(args, 4)
+
+			pngs, err := zplToPNGsBytesAll(zpl, widthMm, heightMm, dpmm, enableInvertedLabels, grayscaleOutput)
 			if err != nil {
 				reject.Invoke(js.Global().Get("Error").New("Error rendering: " + err.Error()))
 				return

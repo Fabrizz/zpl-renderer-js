@@ -1,4 +1,19 @@
 
+export type RenderOptions = {
+  /**
+   * Render labels with inverted orientation upside-down. Only takes effect if
+   * the ZPL itself requests inverted print orientation (`^POI`) — this just
+   * opts in to honoring that flag. Defaults to `false`.
+   */
+  enableInvertedLabels?: boolean;
+  /**
+   * Output an 8-bit grayscale PNG that preserves anti-aliasing, instead of a
+   * binary monochrome image. Reduces pixelation, especially on small text.
+   * Defaults to `false`.
+   */
+  grayscaleOutput?: boolean;
+};
+
 export type ZplApi = {
   /**
    * Render a ZPL label into a PNG image (Base64-encoded string).
@@ -24,6 +39,7 @@ export type ZplApi = {
    * @param widthMm - Label width in millimeters. Defaults to 101.6 mm (~4 inches).
    * @param heightMm - Label height in millimeters. Defaults to 203.2 mm (~8 inches).
    * @param dpmm - Dots per millimeter (print resolution). Defaults to 8 (~203 DPI).
+   * @param options - Additional rendering options (inverted labels, grayscale output).
    * @returns A Promise that resolves to a Base64-encoded PNG image string representing the rendered label.
    * @throws Will throw an error if the ZPL is invalid or rendering fails.
    * @example
@@ -38,7 +54,8 @@ export type ZplApi = {
     zpl: string,
     widthMm?: number,
     heightMm?: number,
-    dpmm?: number
+    dpmm?: number,
+    options?: RenderOptions
   ) => Promise<string>;
 
   /**
@@ -48,6 +65,7 @@ export type ZplApi = {
    * @param widthMm - Label width in millimeters. Defaults to 101.6 mm (~4 inches).
    * @param heightMm - Label height in millimeters. Defaults to 203.2 mm (~8 inches).
    * @param dpmm - Dots per millimeter (print resolution). Defaults to 8 (~203 DPI).
+   * @param options - Additional rendering options (inverted labels, grayscale output).
    * @returns A Promise that resolves to an array of Base64-encoded PNG image strings representing the rendered labels.
    * @throws Will throw an error if the ZPL is invalid or rendering fails.
    * @example
@@ -63,6 +81,7 @@ export type ZplApi = {
     zpl: string,
     widthMm?: number,
     heightMm?: number,
-    dpmm?: number
+    dpmm?: number,
+    options?: RenderOptions
   ) => Promise<string[]>;
 };

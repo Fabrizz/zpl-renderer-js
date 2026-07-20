@@ -1,11 +1,11 @@
 
 import "./wasm_exec.js";
 import { initGoWasm } from "./wasm-wrapper";
-import type { ZplApi } from "./api-types";
+import type { ZplApi, RenderOptions } from "./api-types";
 
 export const ZEBRASH_VERSION = __ZEBRASH_VERSION__ || "";
 
-export type { ZplApi };
+export type { ZplApi, RenderOptions };
 
 export const ready: Promise<{ api: ZplApi }> = (async () => {
   const { api } = await initGoWasm<ZplApi>({ namespace: "zpl" });
@@ -31,18 +31,20 @@ export async function zplToBase64Async(
   zpl: string,
   widthMm?: number,
   heightMm?: number,
-  dpmm?: number
+  dpmm?: number,
+  options?: RenderOptions
 ): Promise<string> {
   const api = await getApi();
-  return api.zplToBase64Async(zpl, widthMm, heightMm, dpmm);
+  return api.zplToBase64Async(zpl, widthMm, heightMm, dpmm, options);
 }
 
 export async function zplToBase64MultipleAsync(
   zpl: string,
   widthMm?: number,
   heightMm?: number,
-  dpmm?: number
+  dpmm?: number,
+  options?: RenderOptions
 ): Promise<string[]> {
   const api = await getApi();
-  return api.zplToBase64MultipleAsync(zpl, widthMm, heightMm, dpmm);
+  return api.zplToBase64MultipleAsync(zpl, widthMm, heightMm, dpmm, options);
 }
