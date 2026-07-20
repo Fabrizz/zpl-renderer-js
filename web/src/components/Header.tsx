@@ -21,7 +21,7 @@ export default function Header() {
         <h1 className="text-sm font-extrabold lg:text-xl font-heading
            text-transparent bg-clip-text
            bg-[#fff6c0]">
-          XA Editor
+          Xa Viewer
         </h1>
         <Dialog>
           <DialogTrigger asChild>
@@ -45,11 +45,11 @@ export default function Header() {
                     <h1 className="text-xl font-extrabold font-heading
                     text-transparent bg-clip-text
                     bg-[#fff6c0]">
-                      XA Editor for ZPL
+                      Xa Viewer for ZPL
                     </h1>
                   </div>
                   <span className='text-sm text-white'>
-                    XA Editor is a web application that allows you to view and edit ZPL (Zebra Programming Language) code.
+                    Xa Viewer is a web application that allows you to view and edit ZPL (Zebra Programming Language) code.
                   </span>
                 </div>
                 <div>
@@ -65,7 +65,7 @@ export default function Header() {
                       </h1>
                     </div>
                     <span className='text-sm text-white'>
-                      Zpl-Renderer-JS is a JavaScript library that allows you to render ZPL code in the browser. It is used by XA Editor to render ZPL code in real-time.
+                      Zpl-Renderer-JS is a JavaScript library that allows you to render ZPL code in the browser. It is used by Xa Viewer to render ZPL code in real-time.
                     </span>
                     <span className='text-sm text-white'>An alternative to Labelary, Labelzoom or others that use an external API (sending your labels to a third party) to render.</span>
                   </a>

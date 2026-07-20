@@ -429,7 +429,7 @@ function App() {
                 </div>
               </div>
             }>
-              <ZplPreviewWW debounce={500} debounceConfig={1000} zpl={zpl} wmm={wmm} hmm={hmm} dpmm={dpmm} rotation={rotation} setimageArray={setimageArray} dwPng={dwPng} className='max-h-full z-10 max-w-full object-contain select-none' />
+              <ZplPreviewWW debounce={500} debounceConfig={1000} zpl={zpl} wmm={wmm} hmm={hmm} dpmm={dpmm} rotation={rotation} grayscaleOutput={grayscaleOutput} enableInvertedLabels={enableInvertedLabels} setimageArray={setimageArray} dwPng={dwPng} className='max-h-full z-10 max-w-full object-contain select-none' />
             </Suspense>
           </div>
         </div>
