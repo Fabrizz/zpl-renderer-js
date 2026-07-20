@@ -25,7 +25,8 @@
   "module": "dist/index.esm.js",
   "types": "dist/index.d.ts",
   "scripts": {
-    "build": "npm run build:types && node build.js",
+    "build": "npm run clean && npm run build:types && node build.js",
+    "clean": "node -e \"require('fs').rmSync('dist', { recursive: true, force: true })\"",
     "build:types": "tsc -p tsconfig.json",
     "build:wasm": "cd zebrash && GOOS=js GOARCH=wasm go build -o main.wasm -trimpath -buildvcs=false -ldflags=\"-s -w\" .",
     "build:pw:wasm": "cd zebrash; $env:GOOS='js'; $env:GOARCH='wasm'; go build -o main.wasm -trimpath -buildvcs=false -ldflags='-s -w' .",
