@@ -18,16 +18,58 @@ npm i zpl-renderer-js
 ```
 
 ## Usage
-The NPM package includes `.umd`, `.esm`, and `.cjs` builds. You can find the raw WASM in the Github Releases.
-> In case of using the raw `WASM` you will need to load `src/wasm_exec.js` and create a wrapper for the function.
-
-> [!WARNING]  
-> The output of this library (per build) is **~8MB** as the wasm is inlined inside so no resource has to be loaded separately. It is higly recommended that you use a bundler and lazy load the library (or the component that uses the lib.) <br/> In case of using the `.umd` build defer the load of the resource.
+The NPM package includes `.esm` and `.cjs` builds, in two flavors: the default `zpl-renderer-js` inlines the WASM directly in the JS bundle (simplest, but large), and `zpl-renderer-js/external` loads the WASM as a separate file you control (recommended).
 
 > [!NOTE]
 > Loading the library in a web worker is also recommended and more so if you are planning on doing multiple renderings in a short time span. <br/> For now, you need to use a WebWorker manually. An example WebWorker can be found in `examples/1-zpl-web-worker.ts` and a consumer react component in `examples/1-zpl-ww-consumer.tsx`
 
-### Rendering a single label (Original)
+> [!TIP]
+> Need a plain `<script>`/UMD build (no ES modules, global `zpljs` variable, AMD loaders)? That was removed starting in `4.0.0`. Install the last version that shipped it instead: `npm i zpl-renderer-js@3` (or pin `zpl-renderer-js@3.4.0`) and see [that version's README](https://github.com/Fabrizz/zpl-renderer-js/blob/v3.4.0/README.md) for usage.
+
+### Recommended: external WASM
+`zpl-renderer-js/external` keeps the WASM out of your JS bundle entirely — it ships as a real `dist/zebrash.wasm` file inside the npm package, so jsDelivr/unpkg serve it at a stable, cacheable, streamable CDN URL for free, and bundlers can resolve it as a plain asset. You tell it explicitly where to load the WASM from via `init()`, once, before using anything else.
+
+```ts
+import { init, zplToBase64Async } from "zpl-renderer-js/external";
+
+// Pin this to the exact version you installed, so the WASM always matches
+// the wasm_exec.js runtime bundled in this JS.
+await init({
+  wasmUrl: "https://cdn.jsdelivr.net/npm/zpl-renderer-js@4.0.0/dist/zebrash.wasm",
+  // or: "https://unpkg.com/zpl-renderer-js@4.0.0/dist/zebrash.wasm"
+});
+
+const label = await zplToBase64Async("^XA^FO50,50^ADN,36,20^FDHello^FS^XZ");
+```
+
+**With Vite** (or another bundler that supports the `?url` suffix), you can self-host the WASM file that's already inside the package instead of pointing at a CDN:
+```ts
+import { init, zplToBase64Async } from "zpl-renderer-js/external";
+import wasmUrl from "zpl-renderer-js/wasm?url";
+
+await init({ wasmUrl });
+const label = await zplToBase64Async("^XA^FO50,50^ADN,36,20^FDHello^FS^XZ");
+```
+
+**In Node**, read the bytes from disk instead of fetching over the network:
+```ts
+import { init, zplToBase64Async } from "zpl-renderer-js/external";
+import { readFile } from "node:fs/promises";
+
+const wasmBytes = await readFile(require.resolve("zpl-renderer-js/wasm"));
+await init({ wasmBytes });
+
+const label = await zplToBase64Async("^XA^FO50,50^ADN,36,20^FDHello^FS^XZ");
+```
+`init()` also accepts `wasmModule` (an already-compiled `WebAssembly.Module`, e.g. shared across workers). Calling any render function before `init()` resolves throws a clear error telling you to call it first.
+
+### Inlined WASM (simpler, larger bundle)
+The default `zpl-renderer-js` import is a drop-in, zero-config option — no second file to host — at the cost of bundle size.
+
+> [!WARNING]
+> The output of this build is **~8MB** as the wasm is inlined inside so no resource has to be loaded separately. If bundle size or streaming/caching the WASM matters to you, use `zpl-renderer-js/external` above instead. Otherwise, it is highly recommended that you use a bundler and lazy load the library (or the component that uses it).
+
+#### Rendering a single label (Original)
 ```ts
 import { ready } from "zpl-renderer-js"
 import fs from "node:fs";
@@ -38,7 +80,7 @@ const label = await api.zplToBase64Async("^XA^FO50,50^ADN,36,20^FDHello^FS^XZ");
 fs.writeFileSync("zpl.png", Buffer.from(label, "base64"));
 ```
 
-### Rendering multiple labels
+#### Rendering multiple labels
 ```ts
 import { ready } from "zpl-renderer-js"
 import fs from "node:fs";

@@ -24,23 +24,12 @@ async function runBuild(options) {
   return totalBytes;
 }
 
-async function emitWasmFile() {
-  const result = await build({
-    entryPoints: ["zebrash/main.wasm"],
-    bundle: false,
-    write: false,
-    loader: { ".wasm": "file" },
-    outdir: "dist",
-    assetNames: "zebrash",
-    logLevel: "silent",
-  });
-
-  // Find the generated .wasm in memory and write it
-  const wasmFile = result.outputFiles.find(f => f.path.endsWith(".wasm"));
-  if (!wasmFile) throw new Error("No wasm output found");
-  fs.mkdirSync(path.dirname(wasmFile.path), { recursive: true });
-  fs.writeFileSync(wasmFile.path, wasmFile.contents);
-  console.log("Emitted", wasmFile.path);
+function emitWasmFile() {
+  const srcPath = path.join(__dirname, "zebrash", "main.wasm");
+  const destPath = path.join(__dirname, "dist", "zebrash.wasm");
+  fs.mkdirSync(path.dirname(destPath), { recursive: true });
+  fs.copyFileSync(srcPath, destPath);
+  console.log("Emitted", destPath);
 }
 
 function readZebrashVersionFromGoMod() {
@@ -130,9 +119,17 @@ async function main() {
       }),
       runBuild({
         ...shared,
-        format: "iife",
-        outfile: "dist/index.umd.js",
-        globalName: "zpljs",
+        entryPoints: ["src/index.external.ts"],
+        format: "cjs",
+        outfile: "dist/index.external.cjs.js",
+        platform: "node",
+      }),
+      runBuild({
+        ...shared,
+        entryPoints: ["src/index.external.ts"],
+        format: "esm",
+        outfile: "dist/index.external.esm.js",
+        platform: "neutral",
       }),
     ]);
     bt = results.reduce((a, b) => a + b, 0);
@@ -147,7 +144,7 @@ async function main() {
   try {
     await main();
     copyWasmExecTypes();
-    // await emitWasmFile();
+    emitWasmFile();
     console.log("Build complete. \n\n");
   } catch (e) {
     console.log("Build failed.");
