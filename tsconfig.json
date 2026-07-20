@@ -10,7 +10,8 @@
     "strict": true,
     "skipLibCheck": true,
     "esModuleInterop": true,
-    "verbatimModuleSyntax": true
+    "verbatimModuleSyntax": true,
+    "types": ["node"]
   },
   "include": ["src", "types"],
   "exclude": ["node_modules", "dist", "web"]
