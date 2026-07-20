@@ -1,6 +1,6 @@
 {
   "name": "zpl-renderer-js",
-  "version": "3.4.0",
+  "version": "4.0.0",
   "author": "Fabrizio Bap",
   "license": "MIT",
   "description": "Render ZPL (Zebra Programming Language) to PNG in the browser! Without Labelary or any third-party service.",
@@ -23,11 +23,10 @@
   ],
   "main": "dist/index.cjs.js",
   "module": "dist/index.esm.js",
-  "unpkg": "dist/index.umd.js",
-  "jsdelivr": "dist/index.umd.js",
   "types": "dist/index.d.ts",
   "scripts": {
-    "build": "npm run build:types && node build.js",
+    "build": "npm run clean && npm run build:types && node build.js",
+    "clean": "node -e \"require('fs').rmSync('dist', { recursive: true, force: true })\"",
     "build:types": "tsc -p tsconfig.json",
     "build:wasm": "cd zebrash && GOOS=js GOARCH=wasm go build -o main.wasm -trimpath -buildvcs=false -ldflags=\"-s -w\" .",
     "build:pw:wasm": "cd zebrash; $env:GOOS='js'; $env:GOARCH='wasm'; go build -o main.wasm -trimpath -buildvcs=false -ldflags='-s -w' .",
@@ -36,7 +35,8 @@
   },
   "files": [
     "dist/*.js",
-    "dist/*.ts"
+    "dist/*.ts",
+    "dist/*.wasm"
   ],
   "devDependencies": {
     "@types/node": "^26.1.1",
@@ -51,7 +51,13 @@
       "types": "./dist/index.d.ts",
       "require": "./dist/index.cjs.js",
       "import": "./dist/index.esm.js"
-    }
+    },
+    "./external": {
+      "types": "./dist/index.external.d.ts",
+      "require": "./dist/index.external.cjs.js",
+      "import": "./dist/index.external.esm.js"
+    },
+    "./wasm": "./dist/zebrash.wasm"
   },
   "repository": {
     "type": "git",

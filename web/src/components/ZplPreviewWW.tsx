@@ -20,6 +20,10 @@ type ZplRendererProps = {
   className?: string;
   /** rotation in degrees */
   rotation?: number | undefined;
+  /** output an 8-bit grayscale PNG instead of a binary monochrome image */
+  grayscaleOutput?: boolean;
+  /** honor inverted print orientation (^POI) requested by the ZPL */
+  enableInvertedLabels?: boolean;
   /** callback to receive the base64 PNG string when rendered */
   setimageArray: (b64: string[] | Error) => void;
   /** Download PNG */
@@ -35,6 +39,8 @@ export default function ZplPreviewWW({
   debounceConfig,
   className,
   /* rotation, */
+  grayscaleOutput = false,
+  enableInvertedLabels = false,
   setimageArray,
   dwPng
 }: ZplRendererProps) {
@@ -90,16 +96,17 @@ export default function ZplPreviewWW({
     const w = workerRef.current;
     if (!w) return;
     const id = ++reqIdRef.current;
-    w.postMessage({ id, zpl: debouncedZpl, wmm: wmmD, hmm: hmmD, dpmm: dpmmD });
-  }, [debouncedZpl, wmmD, hmmD, dpmmD]);
+    w.postMessage({ id, zpl: debouncedZpl, wmm: wmmD, hmm: hmmD, dpmm: dpmmD, grayscaleOutput, enableInvertedLabels });
+  }, [debouncedZpl, wmmD, hmmD, dpmmD, grayscaleOutput, enableInvertedLabels]);
 
   if (!loaded) {
     return (
-      <div className='flex-1 h-full flex flex-col items-center px-2 gap-3 justify-center text-white animate-pulse'>
-        <Loader2 className='inline size-8 animate-spin' />
-        <span className='text-white/50'>Waiting initial render</span>
-        <span className='text-white/50 text-xs -mt-2'>Downloading Web Worker</span>
-      </div>
+              <div className='w-full h-full'>
+                <div className='flex-1 flex flex-col items-center px-2 gap-3 justify-center text-white animate-pulse'>
+                  <Loader2 className='inline size-8 animate-spin' />
+                  <span className='text-white/50'>Downloading Web Worker</span>
+                </div>
+              </div>
     );
   }
 
@@ -130,7 +137,7 @@ export default function ZplPreviewWW({
       ) : (
         b64.map((item, idx) => (
           <span className="relative group flex flex-col" key={idx}>
-            <span className={"flex justify-between items-center h-10 transition-all duration-300 overflow-hidden w-full" + (b64.length > 1 ? " " : " h-0! w-0!")}>
+            <span className={"flex justify-between items-center h-10 transition-all duration-300 overflow-hidden w-full" + (b64.length > 1 ? " " : " h-0! w-0! pt-2")}>
               <span className="h-7 min-w-7 bg-white/20 text-white px-2 rounded-md flex items-center justify-center font-semibold">{idx+1}</span>
               <span className="flex gap-1">
                 <Button onClick={() => dwPng(item)} variant='outline' className='rounded-md px-2.5! h-7 flex items-center gap-1'>

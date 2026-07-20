@@ -1,13 +1,17 @@
 import { useState, Suspense, lazy, useRef, useEffect } from 'react'
-import { BookMarked, CodeXml, Grip, Image, Loader2, Proportions, RotateCwSquare, RulerDimensionLine, SquareArrowOutUpRight } from 'lucide-react';
+import { BookMarked, CodeXml, Cog, Contrast, FlipVertical2, Grip, Image, Loader2, Proportions, RotateCwSquare, RulerDimensionLine, ScanText, SquareArrowOutUpRight } from 'lucide-react';
 import { demoZpl } from '../zplLanguage';
 import { Button } from './ui/button';
 import { clamp, downloadBase64Png, downloadTxtFile } from '../lib/utils';
 import { Label } from './ui/label';
 import Header from './Header';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
+import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from './ui/select';
 import { Input } from './ui/input';
+import { Switch } from './ui/switch';
 import { toast } from 'sonner';
+import { NewTag } from './ui/new-tag';
+import { ZPL_RENDERER_VERSION } from "zpl-renderer-js/external";
+
 
 const ZplWorkbench = lazy(() => import('./ZplWorkbench'));
 const ZplPreviewWW = lazy(() => import('./ZplPreviewWW'));
@@ -40,6 +44,9 @@ function App() {
   const [wmm, setWmm] = useState<number | undefined>(DEFAULT_WMM);
   const [hmm, setHmm] = useState<number | undefined>(DEFAULT_HMM);
   const [dpmm, setDpmm] = useState<number | undefined>(DEFAULT_DPMM);
+
+  const [grayscaleOutput, setGrayscaleOutput] = useState<boolean>(false);
+  const [enableInvertedLabels, setEnableInvertedLabels] = useState<boolean>(false);
 
   function setWidth(w: number, unit: string) {
     if (w < 1) w = 1;
@@ -200,16 +207,16 @@ function App() {
       >
         <div className="min-w-0 min-h-0 overflow-hidden bg-[#1e1e1e]">
           <div className='flex flex-col md:h-full'>
-            
-              <Suspense fallback={
-                <div className='flex relative overflow-hidden items-center justify-center gap-2 w-full max-w-full flex-wrap z-20 h-9.5 px-1.5 border-b border-white/10 bg-neutral-900/80'>
-                  <div className='h-7 flex-1 flex items-center px-2 justify-center rounded-md bg-white/10 text-white border animate-pulse'>
-                    <Loader2 className='inline size-4 animate-spin' />
-                  </div>
+
+            <Suspense fallback={
+              <div className='flex relative overflow-hidden items-center justify-center gap-2 w-full max-w-full flex-wrap z-20 h-9.5 px-1.5 border-b border-white/10 bg-neutral-900/80'>
+                <div className='h-7 flex-1 flex items-center px-2 justify-center rounded-md bg-white/10 text-white border animate-pulse'>
+                  <Loader2 className='inline size-4 animate-spin' />
                 </div>
-              }>
-                <Help cmd={cmd} />
-              </Suspense>
+              </div>
+            }>
+              <Help cmd={cmd} />
+            </Suspense>
 
             <div className='flex-1 p-0 m-0 relative md:h-0'>
               <Suspense fallback={
@@ -218,7 +225,7 @@ function App() {
                   <span className='text-white/50'>Loading editor</span>
                 </div>
               }>
-                <ZplWorkbench set={setZpl} initial={demoZpl} onCurrentCommand={zplCurrentCommand}/>
+                <ZplWorkbench set={setZpl} initial={demoZpl} onCurrentCommand={zplCurrentCommand} />
               </Suspense>
             </div>
             <div className='@container text-xs w-full bg-[#1e1e1e] text-white flex gap-1 justify-between border-t border-border'>
@@ -262,10 +269,7 @@ function App() {
           "
         />
 
-        <div className='min-w-0 min-h-0 overflow-hidden bg-neutral-950 relative group pb-10'>
-          <span className='absolute -top-4 -right-4 bg-yellow-400 h-26 w-26 blur-3xl shadow-xl'></span>
-          <span className='absolute -bottom-4 -left-4 bg-pink-400 h-26 w-26 blur-3xl shadow-xl'></span>
-
+        <div className='min-w-0 min-h-0 overflow-hidden bg-neutral-950 relative group pb-4'>
           <div className='@container flex items-center justify-between center gap-2 w-full max-w-full flex-wrap z-20 h-9.5 px-1.5 border-b border-white/10 bg-neutral-900/80'>
             <div className='flex items-center gap-1 text-white/80'>
               <Button onClick={() => dwZpl()} variant='outline' className='rounded-md px-2.5! h-7 flex items-center gap-1'>
@@ -282,7 +286,7 @@ function App() {
                   <span>PDF</span>
                 </Button>
               }>
-                <DownloadAsPdf base64Png={imageArray}/>
+                <DownloadAsPdf base64Png={imageArray} />
               </Suspense>
             </div>
             <div className='z-20 text-white/80 flex items-center gap-1'>
@@ -297,97 +301,132 @@ function App() {
             </div>
           </div>
 
-          <div className='absolute z-20 bottom-0 left-4 w-[calc(100%-32px)] @container max-w-2xl'>
-            <div className='h-full w-full rounded-t-2xl border-t border-l border-r border-white/10 shadow-xl bg-neutral-950/80 backdrop-blur-lg px-3 pb-4 pt-3.5 @md:pb-3! @md:pt-3!'>
-
-              <div className="grid gap-x-3 gap-y-2 @md:grid-cols-2 group/control">
-                <div className="grid gap-3">
-                  <Label htmlFor="alignment" className='items-center flex gap-1 -mb-1.25'>
-                    <span>
-                      <RulerDimensionLine className='inline size-4' />
-                      <RotateCwSquare className='inline size-4 @md:hidden' />
-                    </span>
-                    <span>Label size{" "}<span className='@md:hidden'>& Rotation</span></span>
-                  </Label>
-                  <div className='flex gap-2 items-center w-full'>
-                    <div className='flex-1 flex items-center gap-2'>
-                      <div className='relative flex-1'>
-                        <Input type="number" placeholder="4" className='h-8!' value={labelWidth} onChange={(e) => { setWidth(Number(e.target.value), labelUnit) }} />
-                        <div className="absolute group-hover/control:hidden top-0 right-0 text-xs h-4 w-4 m-1 rounded-full bg-white/10 text-white/80 flex items-center justify-center overflow-hidden ">
-                          <RulerDimensionLine className='inline size-2.5' />
+          <div className="box-border grid h-full w-full py-4 px-3 z-10 place-items-center
+            overflow-y-scroll overscroll-contain [scrollbar-gutter:stable_both-edges] nice-scroll">
+            <div className='w-full h-full'>
+              <div className='z-20 @container flex w-full'>
+                <div className='h-full w-full bg-white/5 border-border border rounded-xl px-3 pb-3 pt-1.5 mb-2'>
+                  <span className='flex gap-1.5 items-center flex-row mb-2 pb-1 border-b px-3 -mx-3'>
+                    <h2 className='font-heading font-bold '>Label Settings</h2>
+                    <span className='text-xs text-white/60 flex-1 font-normal font-heading'>v{ZPL_RENDERER_VERSION}</span>
+                    <Cog className='size-4' />
+                  </span>
+                  <div className="grid gap-x-3 gap-y-3 @md:grid-cols-2 group/control">
+                    <div className="grid gap-3">
+                      <Label htmlFor="alignment" className='items-center flex gap-1 -mb-1.25'>
+                        <span>
+                          <RulerDimensionLine className='inline size-4' />
+                        </span>
+                        <span className='flex-1'>Label size</span>
+                        <NewTag size={"xs"} />
+                      </Label>
+                      <div className='flex gap-2 items-center w-full'>
+                        <div className='flex-1 flex items-center gap-2'>
+                          <div className='relative flex-1'>
+                            <Input type="number" placeholder="4" className='h-8!' value={labelWidth} onChange={(e) => { setWidth(Number(e.target.value), labelUnit) }} />
+                            <div className="absolute group-hover/control:hidden top-0 right-0 text-xs h-4 w-4 m-1 rounded-full bg-white/10 text-white/80 flex items-center justify-center overflow-hidden ">
+                              <RulerDimensionLine className='inline size-2.5' />
+                            </div>
+                          </div>
+                          <div className='relative flex-1'>
+                            <Input type="number" placeholder="8" className='h-8!' value={labelHeight} onChange={(e) => { setHeight(Number(e.target.value), labelUnit) }} />
+                            <div className="absolute group-hover/control:hidden top-0 right-0 text-xs h-4 w-4 m-1 rounded-full bg-white/10 text-white/80 flex items-center justify-center overflow-hidden ">
+                              <RulerDimensionLine className='inline size-2.5 -rotate-90' />
+                            </div>
+                          </div>
                         </div>
+                        <Select onValueChange={setUnit}>
+                          <SelectTrigger
+                            id="alignment"
+                            aria-label="alignment"
+                            className='w-15 h-8!'
+                            value={labelUnit}
+                          >
+                            <SelectValue placeholder={"in"} />
+                          </SelectTrigger>
+                          <SelectContent alignItemWithTrigger>
+                            <SelectGroup>
+                              <SelectLabel>Label Unit</SelectLabel>
+                              <SelectItem value="i" >in</SelectItem>
+                              <SelectItem value="m">mm</SelectItem>
+                              <SelectItem value="c">cm</SelectItem>
+                            </SelectGroup>
+                          </SelectContent>
+                        </Select>
+                        <Button
+                          onClick={() => setRotationInternal((rotation + 90) % 360)}
+                          className='h-8! pr-2! pl-2.5! flex justify-start relative w-15 hidden'
+                          variant={"outline"}
+                        >
+                          {/* TODO ADD CONN LATER */}
+                          <div
+                            className="absolute group-hover/control:hidden top-0 right-0 text-xs h-4 w-4 m-1 rounded-full bg-white/10 text-white/80 flex items-center justify-center overflow-hidden "
+                          >
+                            <RotateCwSquare className='inline size-2.5' />
+                          </div>
+                          <span className='font-normal text-sm'>{rotation}°</span>
+                        </Button>
                       </div>
-                      <div className='relative flex-1'>
-                        <Input type="number" placeholder="8" className='h-8!' value={labelHeight} onChange={(e) => { setHeight(Number(e.target.value), labelUnit) }} />
-                        <div className="absolute group-hover/control:hidden top-0 right-0 text-xs h-4 w-4 m-1 rounded-full bg-white/10 text-white/80 flex items-center justify-center overflow-hidden ">
-                          <RulerDimensionLine className='inline size-2.5 -rotate-90' />
+                    </div>
+                    <div className="grid gap-3">
+                      <Label htmlFor="inch" className='items-center flex gap-1 -mb-1.25'>
+                        <Grip className='inline size-4' />
+                        <span>Print density</span>
+                      </Label>
+
+                      <Select onValueChange={(e: string) => { setDensity(Number(e)) }}>
+                        <SelectTrigger
+                          id="inch"
+                          aria-label="Type"
+                          className='w-full h-8!'
+                          value={String(printDensity)}
+                        >
+                          <SelectValue placeholder={<span>8 dpmm <span className='text-xs'>(203 dpi)</span></span>} />
+                        </SelectTrigger>
+                        <SelectContent alignItemWithTrigger>
+                          <SelectGroup>
+                            <SelectLabel>Label Print Density</SelectLabel>
+                            <SelectItem value="6"><span>6 dpmm <span className='text-xs'>(152 dpi)</span></span></SelectItem>
+                            <SelectItem value="8"><span>8 dpmm <span className='text-xs'>(203 dpi)</span></span></SelectItem>
+                            <SelectItem value="12"><span>12 dpmm <span className='text-xs'>(300 dpi)</span></span></SelectItem>
+                            <SelectItem value="24"><span>24 dpmm <span className='text-xs'>(600 dpi)</span></span></SelectItem>
+                          </SelectGroup>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className='@md:col-span-2'>
+                      <span className='flex gap-1.5 items-center flex-row mb-2'>
+                        <ScanText className='inline size-4' />
+                        <h3 className='text-sm flex-1'>Output options</h3>
+                        <NewTag size={"xs"} />
+                      </span>
+                      <div className='grid gap-2'>
+                        <div className='flex items-center justify-between gap-1.5'>
+                          <Label htmlFor="grayscale" className='items-center flex gap-1.5'>
+                            <Contrast className='inline size-3' />
+                            <span className='text-xs'>Grayscale output</span>
+                          </Label>
+                          <Switch id="grayscale" checked={grayscaleOutput} onCheckedChange={setGrayscaleOutput} />
+                        </div>
+                        <div className='flex items-center justify-between gap-1.5'>
+                          <Label htmlFor="inverted" className='items-center flex gap-1.5'>
+                            <FlipVertical2 className='inline size-3' />
+                            <span className='text-xs'>Inverted labels</span>
+                          </Label>
+                          <Switch id="inverted" checked={enableInvertedLabels} onCheckedChange={setEnableInvertedLabels} />
                         </div>
                       </div>
                     </div>
-                    <Select onValueChange={setUnit}>
-                      <SelectTrigger
-                        id="alignment"
-                        aria-label="alignment"
-                        className='w-15 h-8!'
-                        value={labelUnit}
-                        >
-                        <SelectValue placeholder={"in"} />
-                      </SelectTrigger>
-                      <SelectContent >
-                        <SelectItem value="i" >in</SelectItem>
-                        <SelectItem value="m">mm</SelectItem>
-                        <SelectItem value="c">cm</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <Button
-                      onClick={() => setRotationInternal((rotation + 90) % 360)}
-                      className='h-8! pr-2! pl-2.5! flex justify-start relative w-15 @md:hidden'
-                      variant={"outline"}
-                    >
-                      {/* TODO ADD CONN LATER */}
-                      <div
-                        className="absolute group-hover/control:hidden top-0 right-0 text-xs h-4 w-4 m-1 rounded-full bg-white/10 text-white/80 flex items-center justify-center overflow-hidden "
-                      >
-                        <RotateCwSquare className='inline size-2.5' />
-                      </div>
-                      <span className='font-normal text-sm'>{rotation}°</span>
-                    </Button>
                   </div>
                 </div>
-                <div className="grid gap-3">
-                  <Label htmlFor="inch" className='items-center flex gap-1 -mb-1.25'>
-                    <Grip className='inline size-4' />
-                    <span>Print density</span>
-                  </Label>
-
-                  <Select onValueChange={(e) => { setDensity(Number(e)) }}>
-                    <SelectTrigger
-                      id="inch"
-                      aria-label="Type"
-                      className='w-full h-8!'
-                      value={String(printDensity)}
-                    >
-                      <SelectValue placeholder={<span>8 dpmm <span className='text-xs'>(203 dpi)</span></span>} />
-                    </SelectTrigger>
-                    <SelectContent >
-                      <SelectItem value="6"><span>6 dpmm <span className='text-xs'>(152 dpi)</span></span></SelectItem>
-                      <SelectItem value="8"><span>8 dpmm <span className='text-xs'>(203 dpi)</span></span></SelectItem>
-                      <SelectItem value="12"><span>12 dpmm <span className='text-xs'>(300 dpi)</span></span></SelectItem>
-                      <SelectItem value="24"><span>24 dpmm <span className='text-xs'>(600 dpi)</span></span></SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
               </div>
-
             </div>
-          </div>
-
-          <div className="box-border grid h-full w-full place-items-center py-4 px-3 z-10 
-            overflow-y-scroll overscroll-contain [scrollbar-gutter:stable_both-edges] nice-scroll">
             <Suspense fallback={
-              <div className='flex-1 h-full flex flex-col items-center px-2 gap-3 justify-center text-white animate-pulse'>
-                <Loader2 className='inline size-8 animate-spin' />
-                <span className='text-white/50'>Loading preview</span>
+              <div className='w-full h-full'>
+                <div className='flex-1 flex flex-col items-center px-2 gap-3 justify-center text-white animate-pulse'>
+                  <Loader2 className='inline size-8 animate-spin' />
+                  <span className='text-white/50'>Loading preview component</span>
+                </div>
               </div>
             }>
               <ZplPreviewWW debounce={500} debounceConfig={1000} zpl={zpl} wmm={wmm} hmm={hmm} dpmm={dpmm} rotation={rotation} setimageArray={setimageArray} dwPng={dwPng} className='max-h-full z-10 max-w-full object-contain select-none' />

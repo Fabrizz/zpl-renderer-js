@@ -9,11 +9,15 @@ import { TextEncoder, TextDecoder } from "node:util";
 (globalThis as any).TextEncoder ??= TextEncoder;
 (globalThis as any).TextDecoder ??= TextDecoder;
 
-import { ZEBRASH_VERSION } from "zpl-renderer-js"
+import { ZEBRASH_VERSION, ZPL_RENDERER_VERSION } from "zpl-renderer-js"
 
 test("Read Zebrash version", async () => {
   console.log(`Using zebrash version: ${ZEBRASH_VERSION}`);
+  console.log(`Using library version: ${ZPL_RENDERER_VERSION}`);
 
   expect(typeof ZEBRASH_VERSION).toBe("string");
   expect(ZEBRASH_VERSION.length).toBeGreaterThan(0);
+
+  expect(typeof ZPL_RENDERER_VERSION).toBe("string");
+  expect(ZPL_RENDERER_VERSION.length).toBeGreaterThan(0);
 });
