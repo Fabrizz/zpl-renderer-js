@@ -20,3 +20,10 @@ test("returns an error when zpl is malformed", async () => {
     expect((error as Error).message).toContain("No labels parsed");
   }
 });
+
+test("returns an error when zpl is malformed (multiple)", async () => {
+  const { api } = await ready;
+  await expect(
+    api.zplToBase64MultipleAsync("^LRN^MNY^MFN,N^LH10,12Im a malformed ZPL")
+  ).rejects.toThrow(/no labels parsed/i);
+});

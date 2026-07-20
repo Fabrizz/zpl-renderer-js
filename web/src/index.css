@@ -47,6 +47,16 @@
   --radius-2xl: calc(var(--radius) * 1.8);
   --radius-3xl: calc(var(--radius) * 2.2);
   --radius-4xl: calc(var(--radius) * 2.6);
+  --animate-shiny-text: shiny-text 3s ease-in-out infinite;
+}
+
+@keyframes shiny-text {
+  0%, 90%, 100% {
+    background-position: calc(-100% - var(--shiny-width, 100px)) 0;
+  }
+  30%, 60% {
+    background-position: calc(100% + var(--shiny-width, 100px)) 0;
+  }
 }
 
 :root {

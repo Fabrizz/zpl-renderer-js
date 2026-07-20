@@ -1,7 +1,15 @@
 import { ALargeSmall, Barcode, ChevronDown, Compass, Construction, Ruler, Wrench } from "lucide-react";
 import { suggestionData } from "@/zplLanguage";
-import { useState } from "react";
+import { useState, type CSSProperties } from "react";
 import BasicMarkdown from "./BasicMarkdown";
+
+// Turns a tailwind color utility (eg. "bg-yellow-300" or "text-yellow-300/20")
+// into a CSS value that references the matching tailwind color variable.
+function toCssColorVar(twClass: string) {
+  const [token, opacity] = twClass.replace(/^(bg|text)-/, "").split("/");
+  const varColor = `var(--color-${token})`;
+  return opacity ? `color-mix(in oklab, ${varColor} ${opacity}%, transparent)` : varColor;
+}
 
 function getColors(cmd: (typeof suggestionData[0]) | null | undefined) {
   let Color = "text-yellow-400";
@@ -61,7 +69,12 @@ function getColors(cmd: (typeof suggestionData[0]) | null | undefined) {
     Icon = Ruler;
   }
 
-  return { Color, ColorBg, ColorBorder, ColorFill, Icon };
+  const style: CSSProperties = {
+    "--current-command-color": toCssColorVar(ColorFill),
+    "--current-command-color-text": toCssColorVar(Color),
+  } as CSSProperties;
+
+  return { Color, ColorBg, ColorBorder, ColorFill, Icon, style };
 }
 
 export default function Help({ cmd = "^XA" }: { cmd: string | null | undefined }) {
@@ -88,14 +101,18 @@ export default function Help({ cmd = "^XA" }: { cmd: string | null | undefined }
     }
   }
 
-  const { Color, ColorBg, ColorBorder, ColorFill, Icon } = getColors(command);
+  const { Color, ColorBg, ColorBorder, ColorFill, Icon, style } = getColors(command);
 
   return (
-    <div className={`transition-all relative duration-300 overflow-hidden w-full max-w-full flex-wrap z-20 h-9.5 px-1.5 border-b border-white/10 bg-neutral-900/80 ${open ? "h-32!" : ""}`}>
-      <button onClick={() => setOpen(!open)} className={`my-1.25! gap-1 group overflow-hidden h-7 flex-1 flex items-center px-2 w-full justify-between rounded-md border transition-all duration-300 ${Color} ${ColorBg} ${ColorBorder}`}>
+    <div
+      style={style}
+      className={`transition-all relative duration-300 overflow-hidden w-full max-w-full flex-wrap z-20 h-9.5 px-1.5 border-b border-white/10 bg-neutral-900/80 ${open ? "h-32!" : ""}`}>
+      <button
+      onClick={() => setOpen(!open)}
+      className={`font-heading! my-1.25! gap-1 group overflow-hidden h-7 flex-1 flex items-center px-2 w-full justify-between rounded-md border transition-all duration-300 ${Color} ${ColorBg} ${ColorBorder}`}>
         <span className={`absolute transition-all duration-300 -top-8 -left-8 h-12 w-18 z-0 blur-2xl ${ColorFill}`}></span>
         <span className='font-mono font-bold mt-px z-10'>{cmd || command?.label}</span>
-        <span className='text-white/80 gap-1 mb-0.5 ml-0.5 flex-1 flex items-center justify-center text-sm transition-all z-10'>
+        <span className='text-white/80 gap-1 ml-0.5 flex-1 flex items-center justify-center text-sm transition-all z-10'>
           <span>{command?.detail}</span>
           <ChevronDown className={"inline size-4 transition-all duration-300 " + (open ? "rotate-180" : "")}/>
         </span>
@@ -103,7 +120,7 @@ export default function Help({ cmd = "^XA" }: { cmd: string | null | undefined }
       </button>
       <div className={`text-gray-50 h-22 overflow-y-scroll nice-scroll border-t border-border -mx-1.5 px-2 pt-1`}>
         <BasicMarkdown
-          className="prose max-w-none text-sm"
+          className="prose max-w-none text-sm font-sans!"
           markdown={command?.documentation.value || ""}
         />
       </div>

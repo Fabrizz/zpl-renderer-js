@@ -14,6 +14,8 @@ type InMsg = {
   wmm: number;
   hmm: number;
   dpmm: number;
+  grayscaleOutput?: boolean;
+  enableInvertedLabels?: boolean;
 };
 
 type OutMsg =
@@ -21,9 +23,9 @@ type OutMsg =
   | { id: number; ok: false; error: string };
 
 self.onmessage = async (ev: MessageEvent<InMsg>) => {
-  const { id, zpl, wmm, hmm, dpmm } = ev.data;
+  const { id, zpl, wmm, hmm, dpmm, grayscaleOutput, enableInvertedLabels } = ev.data;
   try {
-    const b64 = await zplToBase64MultipleAsync(zpl, wmm, hmm, dpmm);
+    const b64 = await zplToBase64MultipleAsync(zpl, wmm, hmm, dpmm, { grayscaleOutput, enableInvertedLabels });
     (self as DedicatedWorkerGlobalScope).postMessage({ id, ok: true, b64 } as OutMsg);
   } catch (e: unknown) {
     (self as DedicatedWorkerGlobalScope).postMessage({
