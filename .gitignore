@@ -82,6 +82,7 @@ out
 .nuxt
 dist
 dist-external
+external/
 
 # Gatsby files
 .cache/

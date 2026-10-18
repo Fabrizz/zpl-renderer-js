@@ -63,6 +63,31 @@ const label = await zplToBase64Async("^XA^FO50,50^ADN,36,20^FDHello^FS^XZ");
 ```
 `init()` also accepts `wasmModule` (an already-compiled `WebAssembly.Module`, e.g. shared across workers). Calling any render function before `init()` resolves throws a clear error telling you to call it first.
 
+#### Building an optional custom Zebrash engine
+
+From a source checkout, you can build a compatible canonical Zebrash module at an explicit version or ref without changing the default dependency:
+
+```bash
+npm run build:custom -- github.com/Gobbo89/zebrash@v1.40.0
+```
+
+The command builds in an isolated temporary module with `GOWORK=off` and writes `external/custom-zebrash.wasm` plus resolved module/compiler metadata in `external/custom-zebrash.json`. It accepts canonical `module@version-or-ref` inputs whose `go.mod` declares that same module identity and whose API is compatible with the current adapter. Local paths and forks that retain a different module identity are not supported.
+
+The builder leaves `zebrash/` and all staged or unstaged changes untouched. It also verifies that the selected Go compiler's `wasm_exec.js` matches the runtime bundled by this checkout; use a matching `GOTOOLCHAIN` if necessary. A failed compilation does not replace an existing successful artifact.
+
+Load the result through the existing external entry point:
+
+```ts
+import { init, zplToBase64Async } from "zpl-renderer-js/external";
+import { readFile } from "node:fs/promises";
+
+const wasmBytes = await readFile("external/custom-zebrash.wasm");
+await init({ wasmBytes });
+const label = await zplToBase64Async("^XA^FO50,50^FDcustom engine^FS^XZ");
+```
+
+`init()` also supports `wasmUrl` and `wasmModule`. The builder is a source-checkout tool and is not included in the published npm package. `ZEBRASH_VERSION` continues to identify the package's default bundled engine; inspect `custom-zebrash.json` to identify a custom artifact.
+
 ### Inlined WASM (simpler, larger bundle)
 The default `zpl-renderer-js` import is a drop-in, zero-config option at the cost of bundle size.
 
