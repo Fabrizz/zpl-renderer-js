@@ -108,7 +108,36 @@ const label = await api.zplToBase64Async(
 - `grayscaleOutput` — outputs an 8-bit grayscale PNG that preserves anti-aliasing instead of a binary monochrome image. Use this if rendered text/barcodes look pixelated. Defaults to `false`.
 - `enableInvertedLabels` — honors inverted print orientation (`^POI`) requested by the ZPL itself, rendering the label upside-down. Defaults to `false`.
 
-### ZplApi
+## Building an optional custom Zebrash engine
+
+From a source checkout, you can build a compatible canonical Zebrash module at an explicit version or ref without changing the default dependency:
+
+> [!WARNING]
+> A custom build has direct access to `globalThis` on browser/node, please review the origin of the custom build before running/including it.
+
+```bash
+npm run build:custom -- github.com/Gobbo89/zebrash@v1.40.0
+```
+
+The command builds in an isolated temporary module with `GOWORK=off` and writes `external/custom-zebrash.wasm` plus resolved module/compiler metadata in `external/custom-zebrash.json`. It accepts canonical `module@version-or-ref` inputs whose `go.mod` declares that same module identity and whose API is compatible with the current adapter. Local paths and forks that retain a different module identity are not supported.
+
+The builder leaves `zebrash/` and all staged or unstaged changes untouched. It also verifies that the selected Go compiler's `wasm_exec.js` matches the runtime bundled by this checkout; use a matching `GOTOOLCHAIN` if necessary. A failed compilation does not replace an existing successful artifact.
+
+Load the result through the existing external entry point:
+
+```ts
+import { init, zplToBase64Async } from "zpl-renderer-js/external";
+import { readFile } from "node:fs/promises";
+
+const wasmBytes = await readFile("external/custom-zebrash.wasm");
+await init({ wasmBytes });
+const label = await zplToBase64Async("^XA^FO50,50^FDcustom engine^FS^XZ");
+```
+
+`init()` also supports `wasmUrl` and `wasmModule`. The builder is a source-checkout tool and is not included in the published npm package. `ZEBRASH_VERSION` continues to identify the package's default bundled engine; inspect `custom-zebrash.json` to identify a custom artifact.
+
+
+## ZplApi
 ```ts
   /**
    * Asynchronously render a ZPL label into a PNG image (Base64-encoded string).
