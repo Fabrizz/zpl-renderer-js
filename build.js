@@ -1,7 +1,10 @@
 /* eslint-disable */
 const { build } = require("esbuild");
+const { execFileSync } = require("child_process");
 const fs = require("fs");
 const path = require("path");
+
+const skipWasm = process.argv.includes("--no-wasm");
 
 function formatBytes(bytes) {
   const units = ["B", "KB", "MB", "GB"];
@@ -22,6 +25,40 @@ async function runBuild(options) {
     totalBytes += meta.bytes;
   });
   return totalBytes;
+}
+
+function checkWasmExecRuntime() {
+  const goroot = execFileSync("go", ["env", "GOROOT"], { encoding: "utf8" }).trim();
+  const runtimePath = ["lib", "misc"]
+    .map((dir) => path.join(goroot, dir, "wasm", "wasm_exec.js"))
+    .find((candidate) => fs.existsSync(candidate));
+  if (!runtimePath) {
+    throw new Error(`wasm_exec.js not found in GOROOT (${goroot}).`);
+  }
+  const normalize = (source) => source.replace(/\r\n/g, "\n").trim();
+  const goRuntime = normalize(fs.readFileSync(runtimePath, "utf8"));
+  const bundledRuntime = normalize(fs.readFileSync(path.join(__dirname, "src", "wasm_exec.js"), "utf8"));
+  if (goRuntime !== bundledRuntime) {
+    throw new Error(
+      `Go wasm_exec.js (${runtimePath}) differs from src/wasm_exec.js. Use the matching Go ` +
+      "toolchain (GOTOOLCHAIN), or update src/wasm_exec.js to the new runtime."
+    );
+  }
+}
+
+function buildWasm() {
+  checkWasmExecRuntime();
+  console.log("Building zebrash/main.wasm...");
+  execFileSync(
+    "go",
+    ["build", "-o", "main.wasm", "-trimpath", "-buildvcs=false", "-ldflags=-s -w", "."],
+    {
+      cwd: path.join(__dirname, "zebrash"),
+      env: { ...process.env, GOOS: "js", GOARCH: "wasm" },
+      stdio: "inherit",
+    }
+  );
+  console.log("Built zebrash/main.wasm\n");
 }
 
 function emitWasmFile() {
@@ -151,6 +188,8 @@ async function main() {
 
 (async () => {
   try {
+    if (skipWasm) console.log("Skipping WASM build (--no-wasm), using existing zebrash/main.wasm\n");
+    else buildWasm();
     await main();
     copyWasmExecTypes();
     emitWasmFile();

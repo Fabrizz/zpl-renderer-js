@@ -86,16 +86,53 @@ function darkBounds(png) {
   return { left, top, width: right - left + 1, height: bottom - top + 1 };
 }
 
+const USAGE = [
+  "Usage: npm run test:custom -- <module@version-or-ref> [--expect-fixes]",
+  "",
+  "  <module@version-or-ref>  Zebrash-compatible Go module to build and verify (required).",
+  "                           Prefer an immutable version (vX.Y.Z or a pseudo-version).",
+  "  --expect-fixes           Also assert EAN-8 (^B8), Code 128 subset C (>5) and",
+  "                           whitespace-tolerant ^GF rendering.",
+  "",
+  "Example: npm run test:custom -- github.com/<owner>/zebrash@v1.2.3",
+].join("\n");
+
+const SEMVER = /^v\d+\.\d+\.\d+(?:[-+][0-9A-Za-z.+-]+)?$/;
+
+function parseArgs(argv) {
+  const flags = argv.filter((arg) => arg.startsWith("--"));
+  const positional = argv.filter((arg) => !arg.startsWith("--"));
+  const unknown = flags.filter((flag) => flag !== "--expect-fixes");
+  if (positional.length !== 1 || unknown.length > 0 || flags.includes("--help")) {
+    throw new Error(USAGE);
+  }
+  return { requested: positional[0], expectFixes: flags.includes("--expect-fixes") };
+}
+
 async function main() {
+  const { requested, expectFixes } = parseArgs(process.argv.slice(2));
   const root = path.resolve(__dirname, "..");
-  const requested = process.argv[2] || "github.com/Gobbo89/zebrash@v1.40.0";
+  const target = parseTarget(requested);
+
+  const externalEntry = path.join(root, "dist", "index.external.cjs.js");
+  if (!fs.existsSync(externalEntry)) {
+    throw new Error(`Missing ${path.relative(root, externalEntry)}. Run "npm run build" first.`);
+  }
+
+  if (!SEMVER.test(target.query)) {
+    console.warn(
+      `WARNING: "${target.query}" is not an immutable version. Branches and "latest" can ` +
+      "resolve to different code over time; pin a tag or pseudo-version for reproducible builds.",
+    );
+  }
+
   const sourceFiles = ["zebrash/main.go", "zebrash/go.mod", "zebrash/go.sum", "src/wasm_exec.js"];
   const before = sourceFiles.map((file) => fs.readFileSync(path.join(root, file)));
   const assertSourceUnchanged = () => sourceFiles.forEach((file, index) =>
     assert.deepEqual(fs.readFileSync(path.join(root, file)), before[index], file));
 
-  assert.equal(detectAdapterModule(before[0].toString("utf8")), "github.com/ingridhq/zebrash");
-  assert.deepEqual(parseTarget(requested).modulePath, "github.com/Gobbo89/zebrash");
+  const adapterModule = detectAdapterModule(before[0].toString("utf8"));
+  assert.equal(adapterModule, "github.com/ingridhq/zebrash");
   for (const invalid of [
     "", "--help", "../local@v1", "github.com/x/y", "github.com/x/y@v1;echo hi",
     "github.com/x/y@../local", "github.com/x/y@-bad",
@@ -104,17 +141,24 @@ async function main() {
   }
 
   const temporaryRoot = fs.mkdtempSync(path.join(os.tmpdir(), "custom-build-test-"));
+  let metadata;
   try {
-    const metadata = buildCustom(root, requested, { temporaryRoot });
+    metadata = buildCustom(root, requested, { temporaryRoot });
     assert.equal(metadata.requested, requested);
-    assert.equal(metadata.adapterModule, "github.com/ingridhq/zebrash");
-    assert.equal(metadata.module.Path, "github.com/Gobbo89/zebrash");
-    assert.equal(metadata.module.Version, "v1.40.0");
+    assert.equal(metadata.adapterModule, adapterModule);
+    assert.equal(metadata.module.Path, target.modulePath);
+    if (SEMVER.test(target.query)) {
+      assert.equal(metadata.module.Version, target.query);
+    } else {
+      assert.match(metadata.module.Version, /^v\d+\.\d+\.\d+/, "resolved module version");
+    }
+    assert.match(metadata.module.Sum || "", /^h1:/, "resolved module checksum");
     assert.deepEqual(fs.readdirSync(temporaryRoot), [], "temporary build directory was not removed");
   } finally {
     fs.rmSync(temporaryRoot, { recursive: true, force: true });
   }
   assertSourceUnchanged();
+  console.log(`Resolved ${metadata.module.Path}@${metadata.module.Version} (${metadata.module.Sum})`);
 
   const fixture = fs.mkdtempSync(path.join(os.tmpdir(), "custom-cli-test-"));
   try {
@@ -140,7 +184,7 @@ async function main() {
   }
   assertSourceUnchanged();
 
-  const external = require(path.join(root, "dist", "index.external.cjs.js"));
+  const external = require(externalEntry);
   const wasmBytes = fs.readFileSync(path.join(root, "external", "custom-zebrash.wasm"));
   await external.init({ wasmBytes });
   const render = async (zpl, width = 80, height = 50, dpmm = 8) => {
@@ -149,12 +193,9 @@ async function main() {
     return readPng(base64);
   };
 
-  await render("^XA^FO10,10^A0N,28^FDHello from custom Zebrash^FS^XZ");
-  const ean8 = darkBounds(await render("^XA^FO10,10^BY2^B8N,96,N,N^FD2001101^FS^XZ"));
-  assert.equal(ean8.width, 134, "EAN-8 should contain 67 modules at BY2");
-  const code128 = darkBounds(await render("^XA^FO10,10^BY3^BCN,100,N,N,N^FD>:ABC>512345678^FS^XZ", 100, 50, 8));
-  assert.equal(code128.width, 369, "Code 128 should use subset C after >5");
-  const graphic = darkBounds(await render("^XA^FO10,10^GFA,4,4,1,FF FF FF FF^FS^XZ"));
+  // Core checks: any compatible Zebrash engine must pass these.
+  darkBounds(await render("^XA^FO10,10^A0N,28^FDHello from custom Zebrash^FS^XZ"));
+  const graphic = darkBounds(await render("^XA^FO10,10^GFA,4,4,1,FFFFFFFF^FS^XZ"));
   assert.deepEqual({ width: graphic.width, height: graphic.height }, { width: 8, height: 4 });
 
   const labels = await external.zplToBase64MultipleAsync(
@@ -165,11 +206,26 @@ async function main() {
   );
   assert.equal(labels.length, 2);
   labels.forEach((base64) => assert.equal(Buffer.from(base64, "base64").subarray(0, 8).toString("hex"), PNG_SIGNATURE));
+
+  // Optional checks for engines that include the EAN-8 / Code 128 / ^GF fixes.
+  if (expectFixes) {
+    const ean8 = darkBounds(await render("^XA^FO10,10^BY2^B8N,96,N,N^FD2001101^FS^XZ"));
+    assert.equal(ean8.width, 134, "EAN-8 should contain 67 modules at BY2");
+    const code128 = darkBounds(await render("^XA^FO10,10^BY3^BCN,100,N,N,N^FD>:ABC>512345678^FS^XZ", 100, 50, 8));
+    assert.equal(code128.width, 369, "Code 128 should use subset C after >5");
+    const spaced = darkBounds(await render("^XA^FO10,10^GFA,4,4,1,FF FF FF FF^FS^XZ"));
+    assert.deepEqual({ width: spaced.width, height: spaced.height }, { width: 8, height: 4 });
+  }
+
   assertSourceUnchanged();
-  console.log("PASS: custom build, input rejection, cleanup, failure preservation, external loading, text, EAN-8, Code 128, graphics, and multi-label rendering.");
+  console.log(
+    "PASS: custom build, input rejection, cleanup, failure preservation, external loading, " +
+    "text, graphics, multi-label rendering" +
+    (expectFixes ? ", EAN-8, Code 128 subset C and ^GF whitespace." : "."),
+  );
 }
 
 main().catch((error) => {
-  console.error(error);
+  console.error(error instanceof Error && error.message === USAGE ? USAGE : error);
   process.exitCode = 1;
 });
